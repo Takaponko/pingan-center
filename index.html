@@ -1,0 +1,1671 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>评安中心 · 广告舆情自动监控工作台</title>
+<style>
+:root {
+  --bg: #f4f6fa;
+  --card: #ffffff;
+  --border: #e6e9f0;
+  --text: #1f2937;
+  --muted: #6b7280;
+  --primary: #2563eb;
+  --primary-soft: #eef3ff;
+  --green: #16a34a;
+  --green-soft: #e9f9ef;
+  --amber: #d97706;
+  --amber-soft: #fdf3e2;
+  --red: #dc2626;
+  --red-soft: #fdecea;
+  --purple: #7c3aed;
+  --purple-soft: #f1ecfe;
+  --cyan: #0891b2;
+  --cyan-soft: #e3f7fb;
+  --shadow: 0 1px 3px rgba(16,24,40,.06), 0 1px 2px rgba(16,24,40,.04);
+  --shadow-lg: 0 10px 30px rgba(16,24,40,.10);
+  --radius: 12px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+  background: var(--bg); color: var(--text); font-size: 14px; line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+a { color: inherit; text-decoration: none; }
+
+.topbar {
+  position: sticky; top: 0; z-index: 50; background: #fff;
+  border-bottom: 1px solid var(--border); padding: 0 24px; height: 60px;
+  display: flex; align-items: center; gap: 28px;
+}
+.brand { display: flex; align-items: center; gap: 11px; cursor: pointer; }
+.logo { width: 38px; height: 38px; border-radius: 10px; display: grid; place-items: center; font-size: 19px; background: linear-gradient(135deg,#2563eb,#7c3aed); }
+.brand-text h1 { font-size: 16px; font-weight: 700; line-height: 1.2; }
+.brand-text .sub { font-size: 11px; color: var(--muted); }
+.nav { display: flex; gap: 6px; }
+.nav a { padding: 7px 16px; border-radius: 8px; font-size: 14px; font-weight: 600; color: var(--muted); display: flex; align-items: center; gap: 6px; cursor: pointer; }
+.nav a:hover { background: #f3f4f6; color: var(--text); }
+.nav a.active { background: var(--primary-soft); color: var(--primary); }
+.nav .badge-dot { background: var(--red); color: #fff; border-radius: 999px; font-size: 11px; min-width: 18px; height: 18px; display: grid; place-items: center; padding: 0 5px; }
+.topbar-right { margin-left: auto; display: flex; align-items: center; gap: 10px; font-size: 13px; }
+.live-dot { width: 9px; height: 9px; border-radius: 50%; background: var(--green); animation: pulse 1.8s infinite; }
+@keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(22,163,74,.45);} 70% { box-shadow: 0 0 0 8px rgba(22,163,74,0);} 100% { box-shadow: 0 0 0 0 rgba(22,163,74,0);} }
+.live-text { color: var(--green); font-weight: 600; }
+.divider { width: 1px; height: 18px; background: var(--border); }
+.muted { color: var(--muted); }
+.avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--primary-soft); color: var(--primary); display: grid; place-items: center; font-weight: 600; }
+.container { max-width: 1240px; margin: 0 auto; padding: 24px; }
+.view { display: none; }
+.view.active { display: block; animation: fadeIn .18s ease; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(4px);} to { opacity: 1; transform: none;} }
+
+.btn { border: none; padding: 9px 16px; border-radius: 9px; font-size: 13px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; transition: all .15s; }
+.btn-primary { background: var(--primary); color: #fff; }
+.btn-primary:hover { background: #1d4ed8; }
+.btn-ghost { background: #fff; border: 1px solid var(--border); color: var(--text); }
+.btn-ghost:hover { border-color: var(--primary); color: var(--primary); }
+.btn-sm { padding: 6px 12px; font-size: 12px; }
+
+.card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); margin-bottom: 20px; }
+.card-head { display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; border-bottom: 1px solid var(--border); flex-wrap: wrap; gap: 8px 12px; }
+.card-head h2 { font-size: 15px; font-weight: 700; }
+.card-body { padding: 20px; }
+.section-title { font-size: 13px; color: var(--muted); margin-bottom: 12px; font-weight: 600; }
+.block-head { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px 12px; margin: 2px 0 10px; }
+.block-head h2 { font-size: 15px; font-weight: 700; }
+.step-chip { display: inline-flex; align-items: center; justify-content: center; width: 22px; height: 22px; border-radius: 6px; background: var(--primary-soft); color: var(--primary); font-size: 13px; font-weight: 700; margin-right: 6px; vertical-align: -3px; }
+
+.kpi-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 20px; }
+.kpi-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 18px 20px; box-shadow: var(--shadow); }
+.kpi-label { font-size: 13px; color: var(--muted); margin-bottom: 6px; }
+.kpi-value { font-size: 30px; font-weight: 800; letter-spacing: -.5px; }
+.kpi-value .unit { font-size: 15px; font-weight: 600; color: var(--muted); margin-left: 2px; }
+.kpi-delta { font-size: 12px; margin-top: 5px; }
+.kpi-delta .up { color: var(--green); font-weight: 700; }
+.kpi-delta .down { color: var(--red); font-weight: 700; }
+
+.status-banner { display: flex; align-items: center; gap: 14px; padding: 16px 20px; border-radius: 14px; margin-bottom: 16px; border: 1px solid; }
+.status-banner .sb-icon { font-size: 30px; line-height: 1; }
+.status-banner .sb-main { flex: 1; min-width: 0; }
+.status-banner .sb-title { font-size: 17px; font-weight: 700; }
+.status-banner .sb-sub { font-size: 13px; color: var(--muted); margin-top: 4px; overflow-wrap: break-word; }
+.status-banner .sb-cta { border: none; border-radius: 10px; padding: 10px 18px; font-size: 14px; font-weight: 600; cursor: pointer; white-space: nowrap; }
+.status-banner.lv-red { background:#fef2f2; border-color:#fecaca; } .status-banner.lv-red .sb-title, .status-banner.lv-red .sb-cta { color:#b91c1c; } .status-banner.lv-red .sb-cta { background:#fee2e2; }
+.status-banner.lv-amber { background:#fffbeb; border-color:#fde68a; } .status-banner.lv-amber .sb-title, .status-banner.lv-amber .sb-cta { color:#b45309; } .status-banner.lv-amber .sb-cta { background:#fef3c7; }
+.status-banner.lv-blue { background:#eff6ff; border-color:#bfdbfe; } .status-banner.lv-blue .sb-title, .status-banner.lv-blue .sb-cta { color:#1d4ed8; } .status-banner.lv-blue .sb-cta { background:#dbeafe; }
+.status-banner.lv-green { background:#f0fdf4; border-color:#bbf7d0; } .status-banner.lv-green .sb-title, .status-banner.lv-green .sb-cta { color:#15803d; } .status-banner.lv-green .sb-cta { background:#dcfce7; }
+
+.fnl { padding: 16px 20px; display: flex; flex-direction: column; gap: 10px; }
+.fnl-row { display: grid; grid-template-columns: 130px 1fr 64px; align-items: center; gap: 12px; padding: 10px 12px; border-radius: 10px; border: 1px solid var(--border); cursor: pointer; transition: all .15s; background: #fff; }
+.fnl-row:hover { border-color: var(--primary); box-shadow: 0 4px 14px rgba(37,99,235,.1); transform: translateY(-1px); }
+.fnl-label { font-size: 13px; font-weight: 600; white-space: nowrap; }
+.fnl-track { height: 26px; background: #f1f5f9; border-radius: 7px; overflow: hidden; }
+.fnl-bar { height: 100%; border-radius: 7px; background: linear-gradient(90deg,#60a5fa,#2563eb); transition: width .4s ease; }
+.fnl-row.hot .fnl-bar { background: linear-gradient(90deg,#f87171,#dc2626); }
+.fnl-row.good .fnl-bar { background: linear-gradient(90deg,#4ade80,#16a34a); }
+.fnl-num { font-size: 20px; font-weight: 800; text-align: right; }
+.fnl-row.hot .fnl-num { color: var(--red); }
+.fnl-row.good .fnl-num { color: var(--green); }
+.fnl-hint { grid-column: 2 / span 2; font-size: 11px; color: var(--muted); margin-top: -6px; }
+
+.chart-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px; }
+.chart-grid.one { grid-template-columns: 1fr; }
+.chart-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); }
+.chart-card .ch-head { padding: 14px 20px; border-bottom: 1px solid var(--border); font-size: 14px; font-weight: 700; display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
+.chart-card .ch-head small { font-weight: 400; color: var(--muted); font-size: 12px; }
+.chart-card .ch-body { padding: 16px 20px 20px; }
+.donut-wrap { display: flex; align-items: center; gap: 20px; flex-wrap: wrap; }
+.legend { flex: 1; min-width: 180px; display: flex; flex-direction: column; gap: 8px; }
+.lg-item { display: flex; align-items: center; gap: 8px; font-size: 12.5px; }
+.lg-item i { width: 10px; height: 10px; border-radius: 3px; flex-shrink: 0; }
+.lg-item span { flex: 1; color: var(--muted); }
+.lg-item b { font-weight: 700; }
+.lg-item em { font-style: normal; color: var(--muted); width: 46px; text-align: right; }
+
+.stk-bar { display: flex; height: 34px; border-radius: 8px; overflow: hidden; background: #f1f5f9; }
+.stk-seg { display: grid; place-items: center; color: #fff; font-size: 12px; font-weight: 700; transition: width .4s ease; min-width: 0; }
+
+.nps-bars { display: flex; flex-direction: column; gap: 7px; }
+.nb-row { display: grid; grid-template-columns: 168px 1fr 48px; align-items: center; gap: 10px; font-size: 12px; }
+.nb-label { color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.nb-track { position: relative; height: 18px; background: #f1f5f9; border-radius: 5px; }
+.nb-track .nb-zero { position: absolute; left: 50%; top: -2px; bottom: -2px; width: 1px; background: #cbd5e1; }
+.nb-fill { position: absolute; top: 2px; bottom: 2px; border-radius: 4px; transition: width .4s ease; }
+.nb-fill.up { background: linear-gradient(90deg,#86efac,#16a34a); }
+.nb-fill.down { background: linear-gradient(270deg,#fca5a5,#dc2626); }
+.nb-val { text-align: right; font-weight: 700; }
+
+.risk-item { display: flex; align-items: center; gap: 12px; padding: 12px 14px; border: 1px solid var(--border); border-radius: 12px; margin-bottom: 10px; cursor: pointer; transition: all .15s; background: #fff; }
+.risk-item:hover { border-color: var(--primary); box-shadow: 0 4px 14px rgba(37,99,235,.08); }
+.risk-no { display: flex; align-items: center; justify-content: center; min-width: 32px; height: 32px; border-radius: 8px; background: #f1f5f9; color: var(--muted); font-weight: 700; font-size: 14px; }
+.risk-no.urgent { background: #fee2e2; font-size: 17px; }
+.risk-main { flex: 1; min-width: 0; }
+.risk-title { font-size: 14px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: min(520px, 58vw); }
+.risk-worst { font-size: 13px; background: #f8fafc; border-left: 3px solid var(--primary); padding: 4px 10px; border-radius: 0 6px 6px 0; margin: 6px 0; overflow-wrap: break-word; }
+.risk-meta { font-size: 12px; color: var(--muted); }
+.cta-process { margin-left: auto; background: var(--primary); color: #fff; border: none; padding: 7px 16px; border-radius: 8px; font-size: 12px; font-weight: 700; cursor: pointer; }
+.cta-process:hover { background: #1d4ed8; }
+.empty { text-align: center; color: var(--muted); padding: 40px 0; font-size: 13px; }
+
+.brief { border-left: 4px solid var(--primary); }
+.brief .card-body { font-size: 14px; line-height: 1.75; color: #374151; }
+.brief .hl { color: var(--red); font-weight: 700; }
+
+.rank-toolbar { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; padding: 14px 20px; border-bottom: 1px solid var(--border); }
+.rank-toolbar label { font-size: 13px; color: var(--muted); }
+.rank-select { border: 1px solid var(--border); border-radius: 8px; padding: 7px 10px; font-size: 13px; background: #fff; color: var(--text); }
+.rank-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.rank-block { padding: 16px 20px; }
+.rank-block h3 { font-size: 13px; font-weight: 700; margin-bottom: 12px; }
+.rank-list { display: flex; flex-direction: column; gap: 8px; }
+.rank-item { display: flex; align-items: center; gap: 12px; padding: 12px 14px; border: 1px solid var(--border); border-radius: 10px; cursor: pointer; transition: all .15s; background: #fff; }
+.rank-item:hover { border-color: var(--primary); box-shadow: var(--shadow-lg); }
+.rank-no { width: 26px; font-weight: 800; font-size: 15px; color: var(--muted); flex-shrink: 0; text-align: center; }
+.rank-no.top { color: var(--amber); }
+.rank-no.worst { color: var(--red); }
+.rank-thumb { width: 44px; height: 44px; border-radius: 8px; flex-shrink: 0; display: grid; place-items: center; color: #fff; font-weight: 700; font-size: 16px; }
+.rank-main { flex: 1; min-width: 0; }
+.rank-title { font-weight: 600; font-size: 13px; margin-bottom: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rank-title .plat { color: var(--muted); font-weight: 400; font-size: 12px; }
+.rank-meta { font-size: 12px; color: var(--muted); display: flex; gap: 10px; flex-wrap: wrap; }
+.rank-meta b { color: var(--text); font-weight: 600; }
+.rank-detail { display: none; margin-top: 8px; padding: 8px 10px; background: #f8fafc; border-radius: 8px; font-size: 12px; color: var(--muted); }
+.rank-metric { flex-shrink: 0; text-align: right; }
+.rank-metric .v { font-size: 20px; font-weight: 800; }
+.rank-metric .l { font-size: 11px; color: var(--muted); }
+.rank-expand { border: none; background: none; font-size: 11px; color: var(--primary); margin-left: 6px; cursor: pointer; }
+
+.crumb { font-size: 13px; color: var(--muted); margin-bottom: 16px; }
+.crumb a { color: var(--primary); cursor: pointer; }
+.note-hero { display: flex; gap: 20px; padding: 22px 24px; align-items: flex-start; }
+.note-cover { width: 108px; height: 108px; border-radius: 14px; flex-shrink: 0; display: grid; place-items: center; color: #fff; font-size: 46px; box-shadow: var(--shadow-lg); }
+.note-hero-main { flex: 1; min-width: 0; }
+.note-hero-main h1 { font-size: 20px; font-weight: 800; margin-bottom: 6px; line-height: 1.35; }
+.note-hero-meta { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+.note-hero-author { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 600; flex-wrap: wrap; }
+.metric-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-top: 14px; }
+.metric-box { background: #f8fafc; border: 1px solid var(--border); border-radius: 10px; padding: 10px 12px; }
+.metric-box .v { font-size: 18px; font-weight: 800; }
+.metric-box .l { font-size: 11px; color: var(--muted); margin-top: 2px; }
+.note-brief-card .card-body p { margin: 4px 0; font-size: 14px; line-height: 1.7; overflow-wrap: break-word; }
+.note-brief-card .card-body p:first-child { font-weight: 600; }
+
+.search-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; padding: 14px 20px; border-bottom: 1px solid var(--border); }
+.search-input { flex: 1; min-width: 200px; border: 1px solid var(--border); border-radius: 9px; padding: 9px 14px; font-size: 13px; }
+.search-input:focus { outline: none; border-color: var(--primary); }
+.filter-tabs { display: flex; gap: 6px; flex-wrap: wrap; }
+.filter-tab { padding: 6px 13px; border-radius: 999px; font-size: 12px; cursor: pointer; border: 1px solid var(--border); background: #fff; color: var(--muted); white-space: nowrap; }
+.filter-tab.active { background: var(--primary); color: #fff; border-color: var(--primary); }
+
+.comments-list { padding: 6px 20px 20px; display: flex; flex-direction: column; gap: 12px; }
+.comment-card { border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; background: #fff; transition: box-shadow .15s; }
+.comment-card:hover { box-shadow: var(--shadow-lg); }
+.comment-card.handled { opacity: .62; background: #fafbfc; }
+.comment-head { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+.c-avatar { width: 30px; height: 30px; border-radius: 50%; flex-shrink: 0; display: grid; place-items: center; color: #fff; font-weight: 600; font-size: 12px; }
+.c-author { font-weight: 600; font-size: 13px; }
+.c-status { margin-left: auto; font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 6px; }
+.c-status.st-unhandled { background: var(--red-soft); color: var(--red); }
+.c-status.st-handled { background: var(--green-soft); color: var(--green); }
+.c-time { color: var(--muted); font-size: 12px; }
+.c-text { font-size: 14px; margin-bottom: 10px; }
+.c-tags { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 10px; }
+.tag { font-size: 11px; font-weight: 600; padding: 2px 9px; border-radius: 6px; }
+.tag.nps-promoter { background: var(--green-soft); color: var(--green); }
+.tag.nps-passive { background: var(--amber-soft); color: var(--amber); }
+.tag.nps-detractor { background: var(--red-soft); color: var(--red); }
+.tag.cat-high_intent { background: var(--cyan-soft); color: var(--cyan); }
+.tag.cat-negative { background: var(--red-soft); color: var(--red); }
+.tag.cat-competitor { background: var(--purple-soft); color: var(--purple); }
+.tag.cat-off_topic { background: #f1f5f9; color: #64748b; }
+.tag.cat-faq { background: var(--amber-soft); color: var(--amber); }
+.tag.cat-praise { background: var(--green-soft); color: var(--green); }
+.ai-reco { background: #f8fafc; border: 1px dashed var(--border); border-radius: 8px; padding: 10px 12px; font-size: 12.5px; color: #475569; margin-bottom: 10px; }
+.ai-reco b { color: var(--primary); }
+.comment-actions { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.action-btn { border: 1px solid var(--border); background: #fff; color: var(--text); padding: 6px 12px; border-radius: 8px; font-size: 12px; cursor: pointer; display: inline-flex; align-items: center; gap: 5px; font-weight: 500; }
+.action-btn:hover { border-color: var(--primary); color: var(--primary); }
+.action-btn.reco { border-color: var(--primary); color: var(--primary); background: var(--primary-soft); font-weight: 600; }
+.action-btn.danger { border-color: var(--red); color: var(--red); }
+.action-btn.done { border-color: var(--green); color: var(--green); background: var(--green-soft); font-weight: 600; }
+.action-btn.copy { border-color: var(--primary) !important; color: var(--primary) !important; }
+
+.todo-tabs { display: flex; gap: 8px; padding: 14px 20px; border-bottom: 1px solid var(--border); }
+.todo-tab { padding: 8px 18px; border-radius: 9px; font-size: 13px; font-weight: 600; cursor: pointer; border: 1px solid var(--border); background: #fff; color: var(--muted); display: flex; align-items: center; gap: 7px; }
+.todo-tab.active { background: var(--primary); color: #fff; border-color: var(--primary); }
+.todo-tab .badge-dot { background: var(--red); color: #fff; border-radius: 999px; font-size: 11px; min-width: 18px; height: 18px; display: grid; place-items: center; padding: 0 5px; }
+.todo-item { display: flex; align-items: flex-start; gap: 14px; padding: 16px 20px; border-bottom: 1px solid var(--border); }
+.todo-item:last-child { border-bottom: none; }
+.todo-priority { width: 34px; height: 34px; border-radius: 9px; flex-shrink: 0; display: grid; place-items: center; font-size: 17px; }
+.todo-priority.urgent { background: var(--red-soft); }
+.todo-priority.normal { background: var(--amber-soft); }
+.todo-main { flex: 1; min-width: 0; }
+.todo-comment { font-size: 14px; margin-bottom: 4px; }
+.todo-src { font-size: 12px; color: var(--muted); margin-bottom: 8px; }
+.todo-src a { color: var(--primary); cursor: pointer; }
+.todo-actions { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.todo-side { flex-shrink: 0; text-align: right; display: flex; flex-direction: column; align-items: flex-end; gap: 8px; }
+
+.all-notes-head { padding: 14px 20px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.data-table { width: 100%; border-collapse: collapse; }
+.data-table th { text-align: left; font-size: 12px; color: var(--muted); font-weight: 600; padding: 10px 14px; border-bottom: 1px solid var(--border); background: #fafbfc; white-space: nowrap; }
+.data-table td { padding: 12px 14px; border-bottom: 1px solid var(--border); font-size: 13px; vertical-align: middle; }
+.data-table tr.note-row { cursor: pointer; }
+.data-table tr.note-row:hover { background: var(--primary-soft); }
+.note-cell { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.note-cell .thumb { width: 38px; height: 38px; border-radius: 8px; display: grid; place-items: center; color: #fff; font-size: 17px; flex-shrink: 0; }
+.note-cell .t { font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: min(340px, 32vw); }
+.note-cell .p { font-size: 12px; color: var(--muted); }
+.risk-tag { font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 6px; white-space: nowrap; }
+.risk-tag.high { background: var(--red-soft); color: var(--red); }
+.risk-tag.mid { background: var(--amber-soft); color: var(--amber); }
+.risk-tag.low { background: var(--green-soft); color: var(--green); }
+.num-cell { font-weight: 600; white-space: nowrap; }
+
+.modal-mask { position: fixed; inset: 0; background: rgba(15,23,42,.45); z-index: 100; display: none; align-items: center; justify-content: center; padding: 24px; }
+.modal-mask.show { display: flex; }
+.modal { background: #fff; border-radius: 14px; width: 100%; max-width: 620px; box-shadow: var(--shadow-lg); overflow: hidden; max-height: 88vh; display: flex; flex-direction: column; }
+.modal-head { display: flex; align-items: center; justify-content: space-between; padding: 18px 22px; border-bottom: 1px solid var(--border); }
+.modal-head h2 { font-size: 16px; font-weight: 700; }
+.modal-close { border: none; background: none; font-size: 20px; cursor: pointer; color: var(--muted); }
+.modal-body { padding: 20px 22px; overflow: auto; }
+.form-row { margin-bottom: 14px; }
+.form-row label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 6px; }
+.form-input { width: 100%; border: 1px solid var(--border); border-radius: 9px; padding: 9px 12px; font-size: 13px; }
+.form-textarea { width: 100%; border: 1px solid var(--border); border-radius: 9px; padding: 10px 12px; font-size: 13px; resize: vertical; min-height: 140px; font-family: ui-monospace, Consolas, monospace; line-height: 1.6; }
+.form-hint { font-size: 12px; color: var(--muted); margin-top: 6px; line-height: 1.6; }
+.form-hint.warn { color: var(--amber); }
+.form-tabs { display: flex; gap: 8px; margin-bottom: 16px; border-bottom: 1px solid var(--border); }
+.form-tab { flex: 1; border: none; background: none; padding: 10px 12px; font-size: 13px; font-weight: 600; color: var(--muted); cursor: pointer; border-bottom: 2px solid transparent; }
+.form-tab.active { color: var(--primary); border-bottom-color: var(--primary); }
+.modal-foot { display: flex; justify-content: space-between; gap: 10px; padding: 16px 22px; border-top: 1px solid var(--border); }
+.modal-foot .right { display: flex; gap: 10px; margin-left: auto; }
+.code-block { background:#f8fafc;border:1px solid var(--border);border-radius:8px;padding:10px 12px;font-size:11.5px;font-family:ui-monospace,Consolas,monospace;color:#475569;white-space:pre-wrap;overflow-wrap:anywhere; }
+
+.toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(20px); background: #111827; color: #fff; padding: 10px 20px; border-radius: 10px; font-size: 13px; opacity: 0; pointer-events: none; transition: all .25s; z-index: 200; }
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+.footer { padding: 8px 24px 30px; color: var(--muted); font-size: 12px; text-align: center; }
+
+.note-hero-main h1, .note-hero-meta, .c-text, .ai-reco, .todo-comment, .todo-src, .brief .card-body, .form-hint { overflow-wrap: break-word; word-break: break-word; }
+
+@media (max-width: 900px) {
+  .topbar { height: auto; flex-wrap: wrap; gap: 8px 12px; padding: 10px 16px; }
+  .nav { order: 3; width: 100%; overflow-x: auto; }
+  .nav a { padding: 6px 12px; font-size: 13px; white-space: nowrap; }
+  .container { padding: 16px; }
+  .kpi-row { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+  .chart-grid { grid-template-columns: 1fr; }
+  .metric-grid { grid-template-columns: repeat(3, 1fr); }
+  .rank-col { grid-template-columns: 1fr; }
+  .note-hero { flex-direction: column; gap: 14px; }
+  .search-input { flex-basis: 100%; min-width: 0; }
+  .fnl-row { grid-template-columns: 110px 1fr 54px; }
+  .risk-title { max-width: 100%; white-space: normal; }
+  .topbar-right { order: 2; margin-left: auto; flex-wrap: wrap; }
+}
+@media (max-width: 600px) {
+  .container { padding: 12px; }
+  .brand-text .sub { display: none; }
+  .live-text, .divider { display: none; }
+  .kpi-row { grid-template-columns: 1fr; }
+  .metric-grid { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+  .note-cover { width: 72px; height: 72px; font-size: 30px; }
+  .status-banner { flex-wrap: wrap; gap: 10px; padding: 14px 16px; }
+  .status-banner .sb-cta { width: 100%; }
+  .risk-item { flex-wrap: wrap; }
+  .risk-item .cta-process { width: 100%; margin: 0; text-align: center; }
+  .todo-item { flex-direction: column; gap: 10px; }
+  .todo-side { flex-direction: row; flex-wrap: wrap; align-items: center; }
+  .todo-side .cta-process { margin: 0; }
+  .rank-item { flex-wrap: wrap; }
+  .rank-metric { text-align: left; width: 100%; }
+  .nb-row { grid-template-columns: 120px 1fr 40px; }
+  .modal-foot { flex-wrap: wrap; }
+}
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="brand" data-go="dashboard">
+    <div class="logo">&#128737;&#65039;</div>
+    <div class="brand-text">
+      <h1>评安中心</h1>
+      <span class="sub">广告商业化 · 舆情自动监控工作台</span>
+    </div>
+  </div>
+  <nav class="nav">
+    <a data-nav="dashboard">&#128202; 工作台</a>
+    <a data-nav="notes">&#128218; 全部笔记</a>
+    <a data-nav="todo">&#9989; 待办清单 <span class="badge-dot" id="navBadge" style="display:none">0</span></a>
+  </nav>
+  <div class="topbar-right">
+    <span class="live-dot"></span><span class="live-text">实时监控中</span>
+    <span class="divider"></span>
+    <span class="muted">已派单 <b id="handledTop">0</b> 条</span>
+    <button class="btn btn-ghost btn-sm" onclick="openModal()">&#8681; 导入数据</button>
+    <button class="btn btn-ghost btn-sm" onclick="exportJSON()">&#8679; 导出</button>
+    <button class="btn btn-ghost btn-sm" onclick="resetAll()">&#8635; 重置</button>
+    <span class="avatar">运</span>
+  </div>
+</header>
+
+<main class="container">
+
+  <section class="view" id="view-dashboard">
+    <div id="statusBanner"></div>
+
+    <div class="card">
+      <div class="card-head">
+        <h2><span class="step-chip">1</span>处置漏斗</h2>
+        <span class="muted" style="font-size:12px">点击任一层级，查看对应明细</span>
+      </div>
+      <div class="fnl" id="funnelChart"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-head">
+        <h2><span class="step-chip">2</span>风险处置队列</h2>
+        <span class="muted" style="font-size:12px">按「负面 + 竞品 未派单数」加权降序，高消耗笔记优先保护</span>
+      </div>
+      <div style="padding:16px 20px" id="riskQueue"></div>
+    </div>
+
+    <div class="block-head">
+      <h2><span class="step-chip">3</span>投放数据总览</h2>
+      <span class="muted" style="font-size:12px">消耗 · 曝光 · 口碑大盘，与处置漏斗数字同源</span>
+    </div>
+    <div class="kpi-row" id="kpiRow"></div>
+
+    <div class="chart-grid">
+      <div class="chart-card">
+        <div class="ch-head">评论分类分布 <small id="catDistSub"></small></div>
+        <div class="ch-body" id="catDist"></div>
+      </div>
+      <div class="chart-card">
+        <div class="ch-head">口碑构成（NPS 三分法） <small>推荐者 / 中立者 / 贬损者</small></div>
+        <div class="ch-body" id="npsStack"></div>
+      </div>
+    </div>
+    <div class="chart-grid one">
+      <div class="chart-card">
+        <div class="ch-head">各笔记 NPS <small>绿色为正向口碑，红色为口碑承压，中线为 0 轴</small></div>
+        <div class="ch-body" id="npsBars"></div>
+      </div>
+    </div>
+
+    <div class="card brief">
+      <div class="card-head"><h2><span class="step-chip">4</span>今日简报</h2><span class="muted" id="briefTime" style="font-size:12px"></span></div>
+      <div class="card-body" id="briefBody"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-head">
+        <h2><span class="step-chip">5</span>笔记排名 · 效果回看</h2>
+        <div style="display:flex;gap:10px">
+          <button class="btn btn-primary btn-sm" onclick="openModal('link')">&#8679; 上传新投放笔记</button>
+          <button class="btn btn-ghost btn-sm" data-go="notes">&#128218; 查看全部笔记</button>
+        </div>
+      </div>
+      <div class="rank-toolbar">
+        <label>排序指标：</label>
+        <select class="rank-select" id="sortSelect"></select>
+        <span class="muted" style="font-size:12px">点击排行条目跳转笔记详情；点 &#9662; 展开完整数据</span>
+      </div>
+      <div class="rank-col">
+        <div class="rank-block"><h3>&#128293; TOP 5</h3><div class="rank-list" id="topList"></div></div>
+        <div class="rank-block"><h3>&#9888;&#65039; 最后 5 名</h3><div class="rank-list" id="worstList"></div></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="view" id="view-note">
+    <div class="crumb">&#128202; <a data-go="dashboard">工作台</a> / 笔记详情</div>
+
+    <div class="section-title" style="display:flex;justify-content:space-between;align-items:center">
+      <span>切换笔记：</span>
+      <select class="rank-select" id="noteSelect" style="max-width:420px"></select>
+    </div>
+
+    <div class="card">
+      <div class="card-head"><h2>&#128221; 笔记详情</h2><span class="muted" id="noteRisk"></span></div>
+      <div class="note-hero">
+        <div class="note-cover" id="noteCover">&#128230;</div>
+        <div class="note-hero-main">
+          <h1 id="noteTitle">—</h1>
+          <div class="note-hero-meta" id="noteMeta"></div>
+          <span class="note-hero-author" id="noteAuthor"></span>
+          <div class="metric-grid" id="metricGrid"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card note-brief-card">
+      <div class="card-head"><h2>&#129504; 评论区概括</h2><span class="muted" style="font-size:12px">基于本笔记全部评论实时生成</span></div>
+      <div class="card-body" id="noteBrief"></div>
+    </div>
+
+    <div class="chart-grid">
+      <div class="chart-card">
+        <div class="ch-head">本笔记评论分类分布</div>
+        <div class="ch-body" id="noteCatDist"></div>
+      </div>
+      <div class="chart-card">
+        <div class="ch-head">本笔记口碑构成</div>
+        <div class="ch-body" id="noteNpsStack"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head"><h2>&#128172; 评论区</h2><span class="muted" id="commentSummary"></span></div>
+      <div class="search-row">
+        <input class="search-input" id="searchInput" placeholder="搜索评论内容 / 作者…" />
+        <div class="filter-tabs" id="filterTabs"></div>
+      </div>
+      <div class="comments-list" id="commentsList"></div>
+    </div>
+  </section>
+
+  <section class="view" id="view-notes">
+    <div class="crumb">&#128218; <a data-go="dashboard">工作台</a> / 全部笔记</div>
+    <div class="chart-grid">
+      <div class="chart-card">
+        <div class="ch-head">风险等级分布 <small>高 / 中 / 低风险笔记占比</small></div>
+        <div class="ch-body" id="riskDist"></div>
+      </div>
+      <div class="chart-card">
+        <div class="ch-head">消耗 TOP 6 <small>单位：元</small></div>
+        <div class="ch-body" id="spendBars"></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-head">
+        <h2>&#128218; 全部笔记</h2>
+        <div style="display:flex;gap:10px;align-items:center">
+          <button class="btn btn-primary btn-sm" onclick="openModal('link')">&#8679; 上传新笔记</button>
+          <button class="btn btn-ghost btn-sm" onclick="openModal('json')">&#8681; 导入真实数据</button>
+          <span class="muted" id="notesCount" style="font-size:12px"></span>
+        </div>
+      </div>
+      <div class="all-notes-head">
+        <input class="search-input" id="notesSearch" placeholder="搜索笔记标题 / 作者 / 行业…" style="max-width:340px" />
+        <label class="muted" style="font-size:13px">排序：</label>
+        <select class="rank-select" id="notesSort"></select>
+        <button class="btn btn-ghost btn-sm" id="notesSortDir">降序 &#9660;</button>
+      </div>
+      <div style="overflow-x:auto">
+        <table class="data-table">
+          <thead><tr>
+            <th>笔记</th><th>作者</th><th>行业</th><th>消耗</th><th>曝光</th><th>评论</th><th>NPS</th><th>健康分</th><th>风险</th><th></th>
+          </tr></thead>
+          <tbody id="notesBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section class="view" id="view-todo">
+    <div class="crumb">&#9989; 待办清单 · 需要派单跟进的评论与 AI 研判</div>
+    <div class="card">
+      <div class="todo-tabs">
+        <div class="todo-tab" data-t="unhandled">&#9203; 待派单 <span class="badge-dot" id="unhandledCnt">0</span></div>
+        <div class="todo-tab" data-t="handled">&#9989; 已派单 <span class="badge-dot" id="handledCnt" style="background:var(--green)">0</span></div>
+      </div>
+      <div class="comments-list" id="todoList"></div>
+    </div>
+  </section>
+
+</main>
+
+<div class="footer">单文件应用 · 数据存于浏览器本地 · 所有处置动作仅推荐，人工确认后执行</div>
+
+<div class="modal-mask" id="modal">
+  <div class="modal">
+    <div class="modal-head">
+      <h2>&#128229; 数据导入</h2>
+      <button class="modal-close" onclick="closeModal()">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-tabs">
+        <button class="form-tab active" data-t="link">&#128279; 笔记链接</button>
+        <button class="form-tab" data-t="json">JSON 数据</button>
+        <button class="form-tab" data-t="csv">CSV 评论</button>
+      </div>
+
+      <div class="tabpane" id="pane-link">
+        <div class="form-row">
+          <label>小红书帖子 / 笔记链接（每行一个）</label>
+          <textarea class="form-textarea" id="linkInput" placeholder="https://www.xiaohongshu.com/explore/66xxxxxx&#10;https://xhslink.com/a/xxxx"></textarea>
+          <div class="form-hint warn">当前为纯前端应用，无法真实抓取小红书内容：粘贴后仅记录链接并生成占位笔记，标题 / 作者 / 指标为模拟数据，后续可回填。</div>
+        </div>
+        <div class="form-row">
+          <label>或选择文本文件（.txt / .csv，每行一个链接）</label>
+          <input type="file" class="form-input" id="linkFile" accept=".txt,.csv" />
+        </div>
+      </div>
+
+      <div class="tabpane" id="pane-json" style="display:none">
+        <div class="form-row">
+          <label>粘贴 JSON（笔记 + 评论，将覆盖现有演示数据）</label>
+          <textarea class="form-textarea" id="jsonInput" placeholder='{"notes":[...],"comments":[...]}'></textarea>
+          <div class="form-hint">格式说明：</div>
+          <div class="code-block">{
+  "notes": [{ "title":"笔记标题","author":"博主","spend":320000,
+              "exposure":1280000,"commentCount":1520,"like":46000,
+              "health":88,"risk":"low|mid|high","industry":"数码" }],
+  "comments": [{ "noteId":"N1","author":"用户","time":"2 分钟前",
+                 "text":"评论内容","nps":"promoter|passive|detractor",
+                 "cat":"praise|high_intent|faq|negative|competitor|off_topic",
+                 "reco":"AI 研判建议" }]
+}
+notes 可不写 id，按数组顺序自动生成 N1、N2…
+comments 的 noteId 填笔记 id 或数组下标（从 1 开始）</div>
+        </div>
+        <div class="form-row">
+          <label>或选择 .json 文件</label>
+          <input type="file" class="form-input" id="jsonFile" accept=".json,.txt" />
+        </div>
+      </div>
+
+      <div class="tabpane" id="pane-csv" style="display:none">
+        <div class="form-row">
+          <label>粘贴 CSV 评论（首行为表头，追加到现有评论池）</label>
+          <textarea class="form-textarea" id="csvInput" placeholder="noteId,author,time,text,nps,cat,reco"></textarea>
+          <div class="form-hint">表头字段：<b>noteId, author, time, text, nps, cat, reco</b>（顺序任意，缺字段自动补全）。nps 取值 promoter / passive / detractor；cat 取值 praise / high_intent / faq / negative / competitor / off_topic。</div>
+        </div>
+        <div class="form-row">
+          <label>或选择 .csv 文件</label>
+          <input type="file" class="form-input" id="csvFile" accept=".csv,.txt" />
+        </div>
+      </div>
+
+      <div class="form-hint" id="modalHint" style="color:var(--primary)"></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost btn-sm" id="modalSample">填入示例</button>
+      <div class="right">
+        <button class="btn btn-ghost" onclick="closeModal()">取消</button>
+        <button class="btn btn-primary" id="modalOk">确认导入</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* =========================================================
+   评安中心 · 单文件应用
+   数据层 / 图表层 / 路由层 / 视图层
+   ========================================================= */
+(function () {
+  'use strict';
+
+  var AVATAR_COLORS = ['#2563eb','#7c3aed','#0891b2','#d97706','#16a34a','#dc2626','#5640e0','#0e7490'];
+  var NOTE_COLORS   = ['#2563eb','#7c3aed','#0891b2','#d97706','#16a34a','#dc2626','#5640e0','#0e7490','#e05b9d','#b45309','#0ea5e9','#65a30d'];
+
+  var BASE_NOTES = [
+    { id:'N1', platform:'小红书', title:'iPhone 17 Pro 深度体验：续航和影像真香了', author:'数码小黑', cover:'📱', color:'#2563eb', spend:320000, exposure:1280000, commentCount:1520, like:46000, health:88, risk:'low', industry:'数码' },
+    { id:'N2', platform:'小红书', title:'千元真无线蓝牙耳机横评：降噪真的能打', author:'音频宅', cover:'🎧', color:'#7c3aed', spend:168000, exposure:720000, commentCount:864, like:23000, health:76, risk:'mid', industry:'数码' },
+    { id:'N3', platform:'小红书', title:'200 元以内快充充电宝实测：虚标太多了', author:'续航焦虑症', cover:'🔋', color:'#0891b2', spend:88000, exposure:410000, commentCount:512, like:12800, health:65, risk:'mid', industry:'数码' },
+    { id:'N4', platform:'小红书', title:'学生党笔记本电脑选购攻略（预算 4000-7000）', author:'数码派', cover:'💻', color:'#d97706', spend:210000, exposure:890000, commentCount:1100, like:32000, health:82, risk:'low', industry:'数码' },
+    { id:'N5', platform:'小红书', title:'机械键盘入坑指南：300 块买到顶级手感', author:'键圈老炮', cover:'⌨️', color:'#16a34a', spend:56000, exposure:260000, commentCount:388, like:9800, health:71, risk:'mid', industry:'数码' },
+    { id:'N6', platform:'小红书', title:'百元级 4K 显示器到底值不值：翻车了吗', author:'屏幕党', cover:'🖥️', color:'#dc2626', spend:94000, exposure:400000, commentCount:466, like:11200, health:58, risk:'high', industry:'数码' },
+    { id:'N7', platform:'小红书', title:'智能手表一周深度体验：续航成最大槽点', author:'表圈观察员', cover:'⌚', color:'#5640e0', spend:132000, exposure:580000, commentCount:740, like:18600, health:79, risk:'low', industry:'数码' },
+    { id:'N8', platform:'小红书', title:'1TB 移动固态硬盘速度实测：搬砖党真香', author:'存储狂人', cover:'💾', color:'#0e7490', spend:62000, exposure:230000, commentCount:342, like:8600, health:69, risk:'mid', industry:'数码' },
+    { id:'N9', platform:'小红书', title:'预算 3000 装一台能打游戏的电脑配置单', author:'装机猿', cover:'🎮', color:'#e05b9d', spend:180000, exposure:760000, commentCount:928, like:27000, health:85, risk:'low', industry:'数码' },
+    { id:'N10', platform:'小红书', title:'迷你投影仪避坑指南：便宜真的没好货吗', author:'影音控', cover:'📽️', color:'#b45309', spend:46000, exposure:180000, commentCount:296, like:7200, health:52, risk:'high', industry:'数码' },
+    { id:'N11', platform:'小红书', title:'手机壳 / 贴膜怎么选才不踩雷（附闭眼买清单）', author:'配件党', cover:'🧾', color:'#0ea5e9', spend:28000, exposure:120000, commentCount:250, like:6100, health:73, risk:'low', industry:'数码' },
+    { id:'N12', platform:'小红书', title:'桌面多口氮化镓充电器测评：一充天下', author:'桌面升级中', cover:'🔌', color:'#65a30d', spend:74000, exposure:320000, commentCount:430, like:10800, health:66, risk:'mid', industry:'数码' }
+  ];
+
+  var BASE_COMMENTS = [
+    { id:'C1', noteId:'N1', author:'一颗果', time:'2 分钟前', text:'首发入了，续航真能撑一天，续航党狂喜', nps:'promoter', cat:'praise', reco:'自然推荐者，建议置顶作为口碑背书' },
+    { id:'C2', noteId:'N1', author:'等等党', time:'7 分钟前', text:'请问现在哪里买最划算？以旧换新能抵多少？', nps:'passive', cat:'high_intent', reco:'高意向用户，建议 1 小时内私信引导下单' },
+    { id:'C3', noteId:'N1', author:'地铁通勤人', time:'13 分钟前', text:'信号怎么样？地铁里会不会断流？', nps:'passive', cat:'faq', reco:'FAQ 高频，建议置顶信号实测说明统一回复' },
+    { id:'C4', noteId:'N1', author:'夜拍党', time:'19 分钟前', text:'拍夜景鬼影还是明显，吹过头了', nps:'detractor', cat:'negative', reco:'影像质疑，建议回复并附夜景样张澄清' },
+    { id:'C5', noteId:'N1', author:'花粉一枚', time:'26 分钟前', text:'隔壁华子拍月亮完胜，这代提升有限', nps:'detractor', cat:'competitor', reco:'竞品截流，建议举报并补充对比数据回应' },
+    { id:'C6', noteId:'N1', author:'路过吃瓜', time:'35 分钟前', text:'评论区都是神仙打架，跟手机有关系吗', nps:'passive', cat:'off_topic', reco:'歪楼争论，建议引导回产品主题' },
+
+    { id:'C7', noteId:'N2', author:'降噪党', time:'3 分钟前', text:'降噪真能打，地铁通勤体感静音，香', nps:'promoter', cat:'praise', reco:'推荐者，建议置顶增强信任' },
+    { id:'C8', noteId:'N2', author:'学生党小林', time:'9 分钟前', text:'学生党求链接，百元预算选哪款更值？', nps:'passive', cat:'high_intent', reco:'高意向，建议回复并私信引导选型' },
+    { id:'C9', noteId:'N2', author:'耳朵敏感', time:'16 分钟前', text:'入耳式戴久了耳朵疼吗？有没有半入耳版本？', nps:'passive', cat:'faq', reco:'FAQ，建议置顶佩戴舒适度说明' },
+    { id:'C10', noteId:'N2', author:'声学老哥', time:'22 分钟前', text:'X 牌同价位音质更通透，别只看降噪参数', nps:'detractor', cat:'competitor', reco:'竞品截流，建议举报并补充频响实测回应' },
+    { id:'C11', noteId:'N2', author:'崩溃用户', time:'29 分钟前', text:'断连严重，用了半个月连续两次连不上', nps:'detractor', cat:'negative', reco:'连接稳定性投诉，建议私信转售后排查' },
+    { id:'C12', noteId:'N2', author:'乐迷A', time:'41 分钟前', text:'你们平时听歌用哪个 App？求推荐歌单', nps:'passive', cat:'off_topic', reco:'歪楼，建议引导回耳机体验主题' },
+
+    { id:'C13', noteId:'N3', author:'出差汪', time:'4 分钟前', text:'能给笔记本反向充电吗？功率够不够？', nps:'passive', cat:'faq', reco:'FAQ，建议置顶输出功率与兼容说明' },
+    { id:'C14', noteId:'N3', author:'飞行常客', time:'11 分钟前', text:'求推荐，就想要能带上飞机的容量', nps:'passive', cat:'high_intent', reco:'高意向，建议回复并私信推荐型号' },
+    { id:'C15', noteId:'N3', author:'实测党', time:'18 分钟前', text:'标称 20000 实测只有 3000 多，虚标太严重了', nps:'detractor', cat:'negative', reco:'容量虚标投诉，建议补实测数据并及时回应' },
+    { id:'C16', noteId:'N3', author:'数码比价', time:'24 分钟前', text:'Y 牌同容量更轻，转化率还高很多', nps:'detractor', cat:'competitor', reco:'竞品截流，建议举报并补充对比数据' },
+    { id:'C17', noteId:'N3', author:'续航党', time:'33 分钟前', text:'实测能充两次满，出差党回不去了', nps:'promoter', cat:'praise', reco:'推荐者，建议置顶' },
+    { id:'C18', noteId:'N3', author:'图省事', time:'47 分钟前', text:'现在共享充电宝都 3 块一小时了，谁还带这个', nps:'detractor', cat:'off_topic', reco:'歪楼争议，建议引导回产品价值' },
+
+    { id:'C19', noteId:'N4', author:'大一新生', time:'5 分钟前', text:'大一新生，预算 5000，求你给个确定型号', nps:'passive', cat:'high_intent', reco:'强需求高意向，建议 1 小时内私信给明确推荐' },
+    { id:'C20', noteId:'N4', author:'剪辑萌新', time:'12 分钟前', text:'跟着攻略买的，剪视频完全不卡，谢谢！', nps:'promoter', cat:'praise', reco:'推荐者，建议置顶并感谢互动' },
+    { id:'C21', noteId:'N4', author:'游戏宅', time:'20 分钟前', text:'这个配置能带动 PS 吗？', nps:'passive', cat:'faq', reco:'FAQ，建议统一回复性能说明' },
+    { id:'C22', noteId:'N4', author:'维权中', time:'27 分钟前', text:'客服售后超差，换货等了三周都没下文', nps:'detractor', cat:'negative', reco:'售后投诉，建议立即私信安抚并走加急售后' },
+    { id:'C23', noteId:'N4', author:'比价党', time:'36 分钟前', text:'隔壁能买到同配置便宜 800，多对比下', nps:'detractor', cat:'competitor', reco:'竞品截流，建议举报并提示价保政策' },
+    { id:'C24', noteId:'N4', author:'学弟', time:'44 分钟前', text:'大学生一个月生活费多少够用？', nps:'passive', cat:'off_topic', reco:'歪楼，建议引导回笔记本选购主题' },
+
+    { id:'C25', noteId:'N5', author:'打工人小王', time:'6 分钟前', text:'手感无敌，办公室摸鱼神器（不是）', nps:'promoter', cat:'praise', reco:'推荐者，建议置顶' },
+    { id:'C26', noteId:'N5', author:'码字党', time:'12 分钟前', text:'青轴和红轴哪个更适合码字？', nps:'passive', cat:'high_intent', reco:'高意向，建议回复并私信引导选轴' },
+    { id:'C27', noteId:'N5', author:'DIY 玩家', time:'19 分钟前', text:'支持热插拔吗？想自己换轴', nps:'passive', cat:'faq', reco:'FAQ，建议置顶结构说明' },
+    { id:'C28', noteId:'N5', author:'强迫症', time:'26 分钟前', text:'用了两周键帽开始打油，品控堪忧', nps:'detractor', cat:'negative', reco:'品控投诉，建议私信安抚并补发键帽' },
+    { id:'C29', noteId:'N5', author:'键盘侠', time:'34 分钟前', text:'这个价位买 C 牌线性轴更稳', nps:'detractor', cat:'competitor', reco:'竞品截流，建议举报并补充手感对比' },
+    { id:'C30', noteId:'N5', author:'理性党', time:'43 分钟前', text:'有没有人觉得机械键盘其实也就那样', nps:'passive', cat:'off_topic', reco:'歪楼，建议引导回产品体验' },
+
+    { id:'C31', noteId:'N6', author:'翻车用户', time:'2 分钟前', text:'边框漏光严重，翻车了，退货还要自己出运费', nps:'detractor', cat:'negative', reco:'负面集中，建议降预算/暂停 + 私信安抚并承担退货运费' },
+    { id:'C32', noteId:'N6', author:'修图师', time:'8 分钟前', text:'色偏明显，修图人别买，坑', nps:'detractor', cat:'negative', reco:'负面扩散，建议立即介入并补充校色说明' },
+    { id:'C33', noteId:'N6', author:'面板党', time:'14 分钟前', text:'同价位 A 牌面板素质吊打，别交学费', nps:'detractor', cat:'competitor', reco:'竞品截流，建议举报并补充面板参数对比' },
+    { id:'C34', noteId:'N6', author:'办公族', time:'23 分钟前', text:'只想要办公看文档的，值得入吗？', nps:'passive', cat:'high_intent', reco:'高意向，建议回复并私信引导' },
+    { id:'C35', noteId:'N6', author:'Mac 用户', time:'31 分钟前', text:'Type-C 能不能一线通笔记本？', nps:'passive', cat:'faq', reco:'FAQ，建议置顶接口兼容说明' },
+    { id:'C36', noteId:'N6', author:'老粉', time:'40 分钟前', text:'博主是不是恰饭了，之前推的也翻车', nps:'detractor', cat:'off_topic', reco:'引战攻击，建议举报并官方回应' },
+
+    { id:'C37', noteId:'N7', author:'健身党', time:'4 分钟前', text:'睡眠监测很准，健身党很满意', nps:'promoter', cat:'praise', reco:'推荐者，建议置顶' },
+    { id:'C38', noteId:'N7', author:'续航焦虑', time:'10 分钟前', text:'续航拉胯，开常亮屏一天都撑不住', nps:'detractor', cat:'negative', reco:'续航吐槽，建议回复续航优化说明' },
+    { id:'C39', noteId:'N7', author:'双平台', time:'17 分钟前', text:'求问 iOS 和安卓兼容性怎么样？', nps:'passive', cat:'high_intent', reco:'高意向，建议私信说明兼容性并引导' },
+    { id:'C40', noteId:'N7', author:'游泳爱好者', time:'24 分钟前', text:'防水能戴着游泳吗？', nps:'passive', cat:'faq', reco:'FAQ，建议置顶防水等级说明' },
+    { id:'C41', noteId:'N7', author:'生态官', time:'33 分钟前', text:'隔壁 S 牌生态更好，价格还便宜', nps:'detractor', cat:'competitor', reco:'竞品截流，建议举报并补充生态对比' },
+    { id:'C42', noteId:'N7', author:'极简党', time:'42 分钟前', text:'现在还有人戴智能手表吗，不如买手环', nps:'passive', cat:'off_topic', reco:'歪楼，建议引导回手表功能价值' },
+
+    { id:'C43', noteId:'N8', author:'后期小哥', time:'5 分钟前', text:'传 50G 视频 20 秒，搬砖党香哭了', nps:'promoter', cat:'praise', reco:'推荐者，建议置顶' },
+    { id:'C44', noteId:'N8', author:'容量党', time:'13 分钟前', text:'求链接，就想要 1TB 的稳定盘', nps:'passive', cat:'high_intent', reco:'高意向，建议私信发链接引导下单' },
+    { id:'C45', noteId:'N8', author:'技术控', time:'20 分钟前', text:'发热严重吗？长时间用会不会掉速？', nps:'passive', cat:'faq', reco:'FAQ，建议置顶散热与掉速说明' },
+    { id:'C46', noteId:'N8', author:'差点丢数据', time:'28 分钟前', text:'用了三个月出现掉盘，数据差点没救回来', nps:'detractor', cat:'negative', reco:'可靠性投诉，建议私信转售后并强调保修' },
+    { id:'C47', noteId:'N8', author:'数码评测', time:'37 分钟前', text:'Q 牌同价位读写更稳定，建议多对比', nps:'detractor', cat:'competitor', reco:'竞品截流，建议举报并补充长期稳定性数据' },
+    { id:'C48', noteId:'N8', author:'网盘党', time:'46 分钟前', text:'你们平时网盘用哪家，阿里还是百度？', nps:'passive', cat:'off_topic', reco:'歪楼，建议引导回硬盘主题' },
+
+    { id:'C49', noteId:'N9', author:'小白一枚', time:'3 分钟前', text:'纯小白照着买能一次点亮吗？', nps:'passive', cat:'high_intent', reco:'强需求高意向，建议私信给装机指导并引导' },
+    { id:'C50', noteId:'N9', author:'装机成功', time:'11 分钟前', text:'照着装好了，跑分爆表，感谢老哥！', nps:'promoter', cat:'praise', reco:'推荐者，建议置顶' },
+    { id:'C51', noteId:'N9', author:'游戏党', time:'18 分钟前', text:'这套配置 LOL / 吃鸡能开到什么画质？', nps:'passive', cat:'faq', reco:'FAQ，建议置顶游戏性能参考' },
+    { id:'C52', noteId:'N9', author:'倒霉蛋', time:'26 分钟前', text:'电源啸叫，退货换了两台还是那样', nps:'detractor', cat:'negative', reco:'质量问题，建议私信安抚并排查电源批次' },
+    { id:'C53', noteId:'N9', author:'方案党', time:'35 分钟前', text:'同预算隔壁方案显卡高一档，性价比更高', nps:'detractor', cat:'competitor', reco:'竞品截流，建议举报并补充方案对比' },
+    { id:'C54', noteId:'N9', author:'观望党', time:'44 分钟前', text:'矿卡翻新太多了，现在别装机，等降价', nps:'detractor', cat:'off_topic', reco:'市场舆论，建议说明货源保障并引导' },
+
+    { id:'C55', noteId:'N10', author:'客厅党', time:'2 分钟前', text:'白天基本没法看，亮度虚标严重', nps:'detractor', cat:'negative', reco:'亮度虚标投诉，建议降预算/暂停并回应' },
+    { id:'C56', noteId:'N10', author:'踩坑', time:'9 分钟前', text:'用了两周就出现亮点，售后推诿', nps:'detractor', cat:'negative', reco:'售后推诿，建议立即私信介入走退换' },
+    { id:'C57', noteId:'N10', author:'理性消费', time:'16 分钟前', text:'千元内买电视不香吗，别交智商税', nps:'detractor', cat:'competitor', reco:'竞品/替代品截流，建议举报并回应价值点' },
+    { id:'C58', noteId:'N10', author:'租房党', time:'23 分钟前', text:'出租房想买，1500 以内有没有推荐？', nps:'passive', cat:'high_intent', reco:'高意向，建议私信推荐并引导' },
+    { id:'C59', noteId:'N10', author:'小白', time:'31 分钟前', text:'支持自动对焦和梯形校正吗？', nps:'passive', cat:'faq', reco:'FAQ，建议置顶功能说明' },
+    { id:'C60', noteId:'N10', author:'家居党', time:'40 分钟前', text:'你们投影仪放客厅还是卧室？', nps:'passive', cat:'off_topic', reco:'歪楼，建议引导回产品体验' },
+
+    { id:'C61', noteId:'N11', author:'手残党', time:'5 分钟前', text:'膜贴上去完全无气泡，手感顺滑', nps:'promoter', cat:'praise', reco:'推荐者，建议置顶' },
+    { id:'C62', noteId:'N11', author:'求链接', time:'12 分钟前', text:'求发个链接，我要同款膜', nps:'passive', cat:'high_intent', reco:'高意向，建议私信发链接' },
+    { id:'C63', noteId:'N11', author:'强迫症', time:'21 分钟前', text:'会不会顶膜？镜头位置准不准？', nps:'passive', cat:'faq', reco:'FAQ，建议置顶贴合说明' },
+    { id:'C64', noteId:'N11', author:'后悔党', time:'29 分钟前', text:'用了一周边缘就翘起来了，质量不行', nps:'detractor', cat:'negative', reco:'质量投诉，建议私信补发并致歉' },
+    { id:'C65', noteId:'N11', author:'比价', time:'37 分钟前', text:'P 牌同款便宜一半，效果一样', nps:'detractor', cat:'competitor', reco:'竞品截流，建议举报并补充耐用性对比' },
+    { id:'C66', noteId:'N11', author:'裸机党', time:'45 分钟前', text:'我一般裸机，贴膜是不是智商税？', nps:'passive', cat:'off_topic', reco:'歪楼，建议引导回保护价值' },
+
+    { id:'C67', noteId:'N12', author:'桌面控', time:'4 分钟前', text:'一个头搞定手机电脑耳机，桌面清爽多了', nps:'promoter', cat:'praise', reco:'推荐者，建议置顶' },
+    { id:'C68', noteId:'N12', author:'游戏本用户', time:'12 分钟前', text:'求问 100W 的能给游戏本供电吗？', nps:'passive', cat:'high_intent', reco:'高意向，建议私信说明功率并引导' },
+    { id:'C69', noteId:'N12', author:'多设备', time:'20 分钟前', text:'多个口同时充会不会降功率？', nps:'passive', cat:'faq', reco:'FAQ，建议置顶多口功率分配说明' },
+    { id:'C70', noteId:'N12', author:'敏感用户', time:'28 分钟前', text:'充手机发热严重，还有点电流声', nps:'detractor', cat:'negative', reco:'发热与电流声投诉，建议私信转售后' },
+    { id:'C71', noteId:'N12', author:'测评号', time:'36 分钟前', text:'N 款同功率更小更凉，做工更好', nps:'detractor', cat:'competitor', reco:'竞品截流，建议举报并补充温控对比' },
+    { id:'C72', noteId:'N12', author:'出差党', time:'44 分钟前', text:'你们出门会带几个充电头？', nps:'passive', cat:'off_topic', reco:'歪楼，建议引导回产品主题' }
+  ];
+
+  var NPS_LABEL = { promoter:'推荐者', passive:'中立者', detractor:'贬损者' };
+  var NPS_ICON  = { promoter:'\u{1F642}', passive:'\u{1F610}', detractor:'\u{1F620}' };
+  var NPS_COLOR = { promoter:'#16a34a', passive:'#f59e0b', detractor:'#dc2626' };
+  var CAT_LABEL = { high_intent:'高意向', negative:'负面', competitor:'竞品相关', off_topic:'歪楼信号', faq:'FAQ 高频', praise:'好评' };
+  var CAT_ICON  = { high_intent:'\u{1F3AF}', negative:'\u26A0\uFE0F', competitor:'\u{1F977}', off_topic:'\u{1F300}', faq:'\u{1F4AC}', praise:'\u{1F44D}' };
+  var CAT_COLOR = { praise:'#16a34a', high_intent:'#0891b2', faq:'#d97706', negative:'#dc2626', competitor:'#7c3aed', off_topic:'#94a3b8' };
+  var CAT_ORDER = ['praise','high_intent','faq','negative','competitor','off_topic'];
+  var RISK_LABEL = { high:'高风险', mid:'中风险', low:'低风险' };
+  var RISK_COLOR = { high:'#dc2626', mid:'#d97706', low:'#16a34a' };
+  var ACTION_LABEL = { reply:'回复', pin:'置顶', report:'举报', dm:'私信', budget:'降预算/暂停', thank:'感谢互动', delete:'删除' };
+  var ACTOR_LABEL  = { dm:'博主', pin:'博主', reply:'博主', report:'自己', budget:'自己', thank:'博主', delete:'博主' };
+  var ACTION_SCRIPT = {
+    dm:'【推荐回复】您好，看到您的留言，已私信为您发送详细信息，请查收～',
+    reply:'【推荐回复】感谢反馈，相关问题已同步给团队核实，有进展会第一时间同步您。',
+    pin:'【置顶】本条评论可作为统一回应 / 口碑背书，建议置顶。',
+    report:'【操作】对该评论发起平台举报（类别：广告 / 引战 / 竞品截流）。',
+    budget:'【操作】建议对该笔记降低出价或暂停投放，待舆情回落后再恢复。',
+    thank:'【推荐回复】感谢支持，后续会继续分享更多好物，欢迎关注～',
+    delete:'【操作】建议删除该评论（理由：广告 / 引战 / 不实内容或竞品截流），避免继续扩散。'
+  };
+  var TODO_CATS = ['high_intent','negative','competitor','off_topic','faq'];
+
+  /* ---------------- 状态（localStorage 持久化） ---------------- */
+  var KEY = 'pazx_state_v2';
+  function loadState() {
+    try {
+      var raw = localStorage.getItem(KEY);
+      if (raw) {
+        var s = JSON.parse(raw);
+        s.handled = s.handled || {};
+        s.scripts = s.scripts || {};
+        s.extraNotes = s.extraNotes || [];
+        s.dataset = s.dataset || null;
+        return s;
+      }
+    } catch (e) { /* ignore */ }
+    return { handled:{}, scripts:{}, extraNotes:[], dataset:null };
+  }
+  function saveState() { try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {} }
+  var state = loadState();
+
+  function markHandled(id, action, script) {
+    state.handled[id] = action || 'reply';
+    if (script) state.scripts[id] = script;
+    saveState();
+  }
+  function unmarkHandled(id) { delete state.handled[id]; delete state.scripts[id]; saveState(); }
+  function isHandled(id) { return !!state.handled[id]; }
+  function getHandledAction(id) { return state.handled[id] || ''; }
+  function getScript(id) { return state.scripts[id] || ''; }
+  function getHandledCount() { return Object.keys(state.handled).length; }
+
+  function getNotes() {
+    var base = (state.dataset && state.dataset.notes) ? state.dataset.notes : BASE_NOTES;
+    return base.concat(state.extraNotes || []);
+  }
+  function getComments() {
+    return (state.dataset && state.dataset.comments) ? state.dataset.comments : BASE_COMMENTS;
+  }
+  function getNote(id) { return getNotes().filter(function (n) { return n.id === id; })[0]; }
+
+  function computeMetrics(note) {
+    var cs = getComments().filter(function (c) { return c.noteId === note.id; });
+    var total = cs.length || 1;
+    var p = cs.filter(function (c) { return c.nps === 'promoter'; }).length;
+    var d = cs.filter(function (c) { return c.nps === 'detractor'; }).length;
+    return {
+      nps: Math.round(((p - d) / total) * 100),
+      intent: Math.round((cs.filter(function (c) { return c.cat === 'high_intent'; }).length / total) * 100),
+      onTopic: Math.round((cs.filter(function (c) { return c.cat !== 'off_topic'; }).length / total) * 100),
+      commentTotal: cs.length
+    };
+  }
+
+  /* ---------------- 工具 ---------------- */
+  function fmtWan(n) { return n >= 10000 ? (n / 10000).toFixed(1) + '万' : String(n); }
+  function hashColor(str) { var h = 0; for (var i = 0; i < str.length; i++) h = (h * 31 + str.charCodeAt(i)) >>> 0; return AVATAR_COLORS[h % AVATAR_COLORS.length]; }
+  function esc(s) {
+    return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+      return { '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c];
+    });
+  }
+  function el(id) { return document.getElementById(id); }
+  var toastTimer = null;
+  function toast(msg) {
+    var t = el('toast');
+    t.textContent = msg; t.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { t.classList.remove('show'); }, 2200);
+  }
+  function copyText(text) {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).catch(function () { fallbackCopy(text); });
+      return;
+    }
+    fallbackCopy(text);
+  }
+  function fallbackCopy(text) {
+    var ta = document.createElement('textarea');
+    ta.value = text; ta.style.cssText = 'position:fixed;left:-9999px;top:0;opacity:0';
+    document.body.appendChild(ta); ta.focus(); ta.select();
+    try { document.execCommand('copy'); } catch (e) {}
+    document.body.removeChild(ta);
+  }
+  function buildActions(cat) {
+    var map = {
+      high_intent:[{type:'dm',icon:'\u{1F48C}',label:'私信引导',reco:true},{type:'pin',icon:'\u{1F4CC}',label:'置顶'},{type:'reply',icon:'\u{1F4AC}',label:'回复'}],
+      negative:[{type:'dm',icon:'\u{1F48C}',label:'私信安抚',reco:true},{type:'reply',icon:'\u{1F4AC}',label:'回复'},{type:'delete',icon:'\u{1F5D1}\uFE0F',label:'删除',danger:true},{type:'budget',icon:'\u{1F4C9}',label:'降预算',danger:true}],
+      competitor:[{type:'report',icon:'\u{1F6A9}',label:'举报',reco:true,danger:true},{type:'delete',icon:'\u{1F5D1}\uFE0F',label:'删除',danger:true},{type:'reply',icon:'\u{1F4AC}',label:'回复'}],
+      off_topic:[{type:'reply',icon:'\u{1F4AC}',label:'引导回主题',reco:true},{type:'delete',icon:'\u{1F5D1}\uFE0F',label:'删除',danger:true},{type:'report',icon:'\u{1F6A9}',label:'举报'}],
+      faq:[{type:'pin',icon:'\u{1F4CC}',label:'置顶 Q&A',reco:true},{type:'reply',icon:'\u{1F4AC}',label:'回复'}],
+      praise:[{type:'pin',icon:'\u{1F4CC}',label:'置顶',reco:true},{type:'thank',icon:'\u{1F4AC}',label:'感谢回复'}]
+    };
+    return map[cat] || [{ type:'reply', icon:'\u{1F4AC}', label:'回复' }];
+  }
+  function inferNps(cat) {
+    if (cat === 'praise') return 'promoter';
+    if (cat === 'negative' || cat === 'competitor') return 'detractor';
+    return 'passive';
+  }
+
+  /* ---------------- 图表（纯 SVG / CSS，无外部依赖） ---------------- */
+  var Chart = {
+    donut: function (items, centerLabel) {
+      var total = items.reduce(function (s, i) { return s + i.value; }, 0) || 1;
+      var cx = 80, cy = 80, R = 68, r = 44;
+      var acc = 0, paths = '';
+      items.forEach(function (it) {
+        if (it.value <= 0) return;
+        var frac = it.value / total;
+        var a0 = acc * Math.PI * 2 - Math.PI / 2;
+        acc += frac;
+        var a1 = Math.min(acc * Math.PI * 2, Math.PI * 2 - 0.0001) - Math.PI / 2;
+        var large = (a1 - a0) > Math.PI ? 1 : 0;
+        var x0 = cx + R * Math.cos(a0), y0 = cy + R * Math.sin(a0);
+        var x1 = cx + R * Math.cos(a1), y1 = cy + R * Math.sin(a1);
+        var x2 = cx + r * Math.cos(a1), y2 = cy + r * Math.sin(a1);
+        var x3 = cx + r * Math.cos(a0), y3 = cy + r * Math.sin(a0);
+        paths += '<path d="M' + x0.toFixed(2) + ' ' + y0.toFixed(2) +
+          ' A' + R + ' ' + R + ' 0 ' + large + ' 1 ' + x1.toFixed(2) + ' ' + y1.toFixed(2) +
+          ' L' + x2.toFixed(2) + ' ' + y2.toFixed(2) +
+          ' A' + r + ' ' + r + ' 0 ' + large + ' 0 ' + x3.toFixed(2) + ' ' + y3.toFixed(2) + ' Z" fill="' + it.color + '"></path>';
+      });
+      var legend = items.map(function (it) {
+        var pct = Math.round((it.value / total) * 100);
+        return '<div class="lg-item"><i style="background:' + it.color + '"></i><span>' + esc(it.label) + '</span><b>' + it.value + '</b><em>' + pct + '%</em></div>';
+      }).join('');
+      return '<div class="donut-wrap"><svg viewBox="0 0 160 160" width="160" height="160">' + paths +
+        '<text x="80" y="76" text-anchor="middle" font-size="22" font-weight="800" fill="#1f2937">' + total + '</text>' +
+        '<text x="80" y="95" text-anchor="middle" font-size="11" fill="#6b7280">' + esc(centerLabel || '总数') + '</text>' +
+        '</svg><div class="legend">' + legend + '</div></div>';
+    },
+    stack: function (items) {
+      var total = items.reduce(function (s, i) { return s + i.value; }, 0) || 1;
+      var segs = items.map(function (it) {
+        var w = (it.value / total) * 100;
+        if (w <= 0) return '';
+        return '<div class="stk-seg" style="width:' + w.toFixed(2) + '%;background:' + it.color + '" title="' + esc(it.label) + ' ' + it.value + '">' + (w > 9 ? it.value : '') + '</div>';
+      }).join('');
+      var legend = items.map(function (it) {
+        var pct = Math.round((it.value / total) * 100);
+        return '<div class="lg-item"><i style="background:' + it.color + '"></i><span>' + esc(it.label) + '</span><b>' + it.value + '</b><em>' + pct + '%</em></div>';
+      }).join('');
+      return '<div class="stk-bar">' + segs + '</div><div class="legend" style="margin-top:14px">' + legend + '</div>';
+    },
+    npsBars: function (items) {
+      if (!items.length) return '<div class="empty">暂无数据</div>';
+      return '<div class="nps-bars">' + items.map(function (it) {
+        var w = Math.min(Math.abs(it.value) / 100 * 50, 50);
+        var pos = it.value >= 0;
+        var style = pos ? 'left:50%;width:' + Math.max(w, 0.6) + '%' : 'right:50%;width:' + Math.max(w, 0.6) + '%';
+        return '<div class="nb-row"><span class="nb-label" title="' + esc(it.label) + '">' + esc(it.label) + '</span>' +
+          '<div class="nb-track"><div class="nb-zero"></div><div class="nb-fill ' + (pos ? 'up' : 'down') + '" style="' + style + '"></div></div>' +
+          '<span class="nb-val" style="color:' + (pos ? 'var(--green)' : 'var(--red)') + '">' + (pos ? '+' : '') + it.value + '</span></div>';
+      }).join('') + '</div>';
+    },
+    valueBars: function (items, colorFrom, colorTo) {
+      if (!items.length) return '<div class="empty">暂无数据</div>';
+      var max = Math.max.apply(null, items.map(function (i) { return i.value; })) || 1;
+      return '<div class="nps-bars">' + items.map(function (it) {
+        var w = Math.max((it.value / max) * 100, 2);
+        return '<div class="nb-row"><span class="nb-label" title="' + esc(it.label) + '">' + esc(it.label) + '</span>' +
+          '<div class="nb-track"><div class="nb-fill up" style="left:0;width:' + w.toFixed(1) + '%;background:linear-gradient(90deg,' + (colorFrom || '#93c5fd') + ',' + (colorTo || '#2563eb') + ')"></div></div>' +
+          '<span class="nb-val">' + esc(it.display) + '</span></div>';
+      }).join('') + '</div>';
+    }
+  };
+
+  function catDistItems(comments) {
+    return CAT_ORDER.map(function (k) {
+      return { label: CAT_ICON[k] + ' ' + CAT_LABEL[k], value: comments.filter(function (c) { return c.cat === k; }).length, color: CAT_COLOR[k] };
+    }).filter(function (i) { return i.value > 0; });
+  }
+  function npsStackItems(comments) {
+    return ['promoter', 'passive', 'detractor'].map(function (k) {
+      return { label: NPS_ICON[k] + ' ' + NPS_LABEL[k], value: comments.filter(function (c) { return c.nps === k; }).length, color: NPS_COLOR[k] };
+    });
+  }
+
+  /* ---------------- 路由 ---------------- */
+  var current = { view: 'dashboard', params: {} };
+
+  function go(view, params) {
+    var qs = '';
+    if (params) {
+      qs = Object.keys(params).filter(function (k) { return params[k] != null && params[k] !== ''; })
+        .map(function (k) { return encodeURIComponent(k) + '=' + encodeURIComponent(params[k]); }).join('&');
+    }
+    location.hash = '#/' + view + (qs ? '?' + qs : '');
+  }
+  function parseHash() {
+    var h = (location.hash || '').replace(/^#\/?/, '');
+    var idx = h.indexOf('?');
+    var path = (idx === -1 ? h : h.slice(0, idx)) || 'dashboard';
+    var params = {};
+    if (idx !== -1) {
+      new URLSearchParams(h.slice(idx + 1)).forEach(function (v, k) { params[k] = v; });
+    }
+    if (['dashboard', 'note', 'notes', 'todo'].indexOf(path) < 0) path = 'dashboard';
+    return { view: path, params: params };
+  }
+  function onRoute() {
+    var r = parseHash();
+    if (r.view === 'note' && r.params.id && r.params.id !== current.params.id) {
+      noteFilter = 'all'; noteSearch = ''; el('searchInput').value = '';
+    }
+    current = r;
+    var views = document.querySelectorAll('.view');
+    for (var i = 0; i < views.length; i++) views[i].classList.remove('active');
+    el('view-' + current.view).classList.add('active');
+    window.scrollTo(0, 0);
+    renderTopbar();
+    renderCurrent();
+  }
+
+  function renderTopbar() {
+    el('handledTop').textContent = getHandledCount();
+    var need = getComments().filter(function (c) { return TODO_CATS.indexOf(c.cat) >= 0 && !isHandled(c.id); }).length;
+    var badge = el('navBadge');
+    if (need > 0) { badge.style.display = ''; badge.textContent = need; } else { badge.style.display = 'none'; }
+    var activeNav = current.view === 'note' ? 'dashboard' : current.view;
+    var navs = document.querySelectorAll('[data-nav]');
+    for (var i = 0; i < navs.length; i++) {
+      navs[i].classList.toggle('active', navs[i].getAttribute('data-nav') === activeNav);
+    }
+  }
+
+  function renderCurrent() {
+    if (current.view === 'dashboard') renderDashboard();
+    else if (current.view === 'note') renderNoteView();
+    else if (current.view === 'notes') renderNotesView();
+    else if (current.view === 'todo') renderTodoView();
+  }
+  function refresh() { renderTopbar(); renderCurrent(); }
+
+  /* =========================================================
+     工作台
+     ========================================================= */
+  var SORT_OPTIONS = [
+    { key:'spend', label:'消耗' }, { key:'exposure', label:'曝光' }, { key:'commentCount', label:'评论数' },
+    { key:'nps', label:'NPS' }, { key:'intent', label:'意向度' }, { key:'onTopic', label:'不歪楼' }
+  ];
+  var dashSort = 'spend';
+
+  function sortValue(note) {
+    var m = computeMetrics(note);
+    var map = { spend: note.spend, exposure: note.exposure, commentCount: note.commentCount, nps: m.nps, intent: m.intent, onTopic: m.onTopic };
+    return map[dashSort];
+  }
+  function displayValue(note, key) {
+    var m = computeMetrics(note);
+    if (key === 'spend') return { v: fmtWan(note.spend), l: '消耗(元)' };
+    if (key === 'exposure') return { v: fmtWan(note.exposure), l: '曝光' };
+    if (key === 'commentCount') return { v: String(note.commentCount || 0), l: '评论数' };
+    if (key === 'nps') return { v: (m.nps >= 0 ? '+' : '') + m.nps, l: 'NPS', color: m.nps >= 0 ? 'var(--green)' : 'var(--red)' };
+    if (key === 'intent') return { v: m.intent + '%', l: '意向度' };
+    return { v: m.onTopic + '%', l: '不歪楼' };
+  }
+
+  function renderStatus() {
+    var notes = getNotes(), comments = getComments();
+    var negUn = comments.filter(function (c) { return c.cat === 'negative' && !isHandled(c.id); }).length;
+    var compUn = comments.filter(function (c) { return c.cat === 'competitor' && !isHandled(c.id); }).length;
+    var todoUn = comments.filter(function (c) { return TODO_CATS.indexOf(c.cat) >= 0 && !isHandled(c.id); }).length;
+    var highRisk = notes.filter(function (n) {
+      return n.risk === 'high' && comments.some(function (c) { return c.noteId === n.id && !isHandled(c.id); });
+    }).length;
+
+    var level, icon, text, sub;
+    if (negUn >= 6 || highRisk > 0) {
+      level = 'red'; icon = '\u{1F6A8}'; text = '红色预警 · 建议立即介入';
+      sub = '仍有 ' + negUn + ' 条负面、' + compUn + ' 条竞品截流未派单' + (highRisk ? '，' + highRisk + ' 篇高风险笔记负面集中' : '') + '。按下方队列顺序，先处理 \u{1F6A8} 标记的笔记。';
+    } else if (negUn + compUn >= 2) {
+      level = 'amber'; icon = '\u{1F7E1}'; text = '黄色关注 · 今日内处理';
+      sub = '未派单负面 ' + negUn + ' 条、竞品 ' + compUn + ' 条。已生成风险队列，建议下班前清零。';
+    } else if (todoUn > 0) {
+      level = 'blue'; icon = '\u{1F535}'; text = '蓝色待办 · 常规跟进';
+      sub = '无紧急负面，剩余 ' + todoUn + ' 条常规待派单（FAQ / 歪楼 / 高意向）。';
+    } else {
+      level = 'green'; icon = '\u{1F7E2}'; text = '舆情健康 · 监控继续';
+      sub = '当前待派单为 0，所有需关注评论均已闭环。';
+    }
+    el('statusBanner').className = 'status-banner lv-' + level;
+    el('statusBanner').innerHTML =
+      '<div class="sb-icon">' + icon + '</div><div class="sb-main"><div class="sb-title">' + text + '</div><div class="sb-sub">' + sub + '</div></div>' +
+      '<button class="sb-cta" data-go="todo">进入处置 →</button>';
+  }
+
+  function renderFunnel() {
+    var comments = getComments();
+    var total = comments.length;
+    var watch = comments.filter(function (c) { return TODO_CATS.indexOf(c.cat) >= 0; }).length;
+    var pending = comments.filter(function (c) { return TODO_CATS.indexOf(c.cat) >= 0 && !isHandled(c.id); }).length;
+    var closed = getHandledCount();
+    var steps = [
+      { icon:'\u{1F4AC}', label:'全部评论', v:total, hint:'监控范围内所有评论', go:'notes' },
+      { icon:'\u{1F3AF}', label:'需关注', v:watch, hint:'高意向 / 负面 / 竞品 / 歪楼 / FAQ', go:'todo' },
+      { icon:'\u23F3', label:'待派单', v:pending, hint:'点击去处理', go:'todo', cls:'hot' },
+      { icon:'\u2705', label:'已闭环', v:closed, hint:'点击查看派单记录', go:'todo', tab:'handled', cls:'good' }
+    ];
+    var max = Math.max(total, watch, pending, closed, 1);
+    el('funnelChart').innerHTML = steps.map(function (s) {
+      return '<div class="fnl-row ' + (s.cls || '') + '" data-go="' + s.go + '"' + (s.tab ? ' data-tab="' + s.tab + '"' : '') + '>' +
+        '<div class="fnl-label">' + s.icon + ' ' + s.label + '</div>' +
+        '<div class="fnl-track"><div class="fnl-bar" style="width:' + Math.max((s.v / max) * 100, 3).toFixed(1) + '%"></div></div>' +
+        '<div class="fnl-num">' + s.v + '</div>' +
+        '<div class="fnl-hint">' + s.hint + '</div></div>';
+    }).join('');
+  }
+
+  function renderRiskQueue() {
+    var comments = getComments(), notes = getNotes();
+    var WEIGHT = { negative:3, competitor:2, off_topic:1, high_intent:0.4, faq:0.2 };
+    var rows = notes.map(function (n) {
+      var cs = comments.filter(function (c) { return c.noteId === n.id && TODO_CATS.indexOf(c.cat) >= 0 && !isHandled(c.id); });
+      if (!cs.length) return null;
+      var cnt = { negative:0, competitor:0, off_topic:0, faq:0, high_intent:0 };
+      cs.forEach(function (c) { cnt[c.cat]++; });
+      var score = cs.reduce(function (s, c) { return s + (WEIGHT[c.cat] || 0); }, 0) + (n.risk === 'high' ? 2 : n.risk === 'mid' ? 0.5 : 0);
+      var worst = cs.slice().sort(function (a, b) { return (WEIGHT[b.cat] || 0) - (WEIGHT[a.cat] || 0); })[0];
+      return { note:n, cs:cs, cnt:cnt, score:score, worst:worst };
+    }).filter(Boolean).sort(function (a, b) { return (b.score - a.score) || (b.note.spend - a.note.spend); });
+
+    if (!rows.length) { el('riskQueue').innerHTML = '<div class="empty">\u{1F389} 队列已清空，所有需关注评论均已派单或处理</div>'; return; }
+
+    el('riskQueue').innerHTML = rows.map(function (r, i) {
+      var n = r.note;
+      var urgent = r.cnt.negative + r.cnt.competitor > 0;
+      var bits = [
+        r.cnt.negative ? '⚠️ 负面 ' + r.cnt.negative : '',
+        r.cnt.competitor ? '\u{1F977} 竞品 ' + r.cnt.competitor : '',
+        r.cnt.high_intent ? '\u{1F3AF} 高意向 ' + r.cnt.high_intent : '',
+        r.cnt.faq ? '\u{1F4AC} FAQ ' + r.cnt.faq : '',
+        r.cnt.off_topic ? '\u{1F300} 歪楼 ' + r.cnt.off_topic : ''
+      ].filter(Boolean).join(' · ');
+      var worstText = r.worst.text.length > 34 ? r.worst.text.slice(0, 34) + '…' : r.worst.text;
+      return '<div class="risk-item" data-go="note" data-id="' + n.id + '">' +
+        '<div class="risk-no' + (urgent ? ' urgent' : '') + '">' + (urgent ? '\u{1F6A8}' : (i + 1)) + '</div>' +
+        '<div class="rank-thumb" style="background:' + n.color + '">' + n.cover + '</div>' +
+        '<div class="risk-main"><div class="risk-title">' + esc(n.title) + ' <span class="plat">· ' + RISK_LABEL[n.risk] + ' · 消耗 ' + fmtWan(n.spend) + '</span></div>' +
+        '<div class="risk-worst">\u{1F4AC} 「' + esc(worstText) + '」 —— ' + esc(r.worst.author) + '</div>' +
+        '<div class="risk-meta">' + bits + ' → <b style="color:var(--red)">待派单 ' + r.cs.length + ' 条</b></div></div>' +
+        '<button class="cta-process">进入处置 →</button></div>';
+    }).join('');
+  }
+
+  function renderKPI() {
+    var notes = getNotes(), comments = getComments();
+    var p = comments.filter(function (c) { return c.nps === 'promoter'; }).length;
+    var d = comments.filter(function (c) { return c.nps === 'detractor'; }).length;
+    var nps = Math.round(((p - d) / (comments.length || 1)) * 100);
+    var spend = notes.reduce(function (s, n) { return s + (n.spend || 0); }, 0);
+    var expo = notes.reduce(function (s, n) { return s + (n.exposure || 0); }, 0);
+    var rows = [
+      { label:'投放笔记', value:notes.length, unit:'篇', delta:'监控中', trend:'up' },
+      { label:'总消耗', value:(spend / 10000).toFixed(1), unit:'万', delta:'投放中', trend:'up' },
+      { label:'总曝光', value:String(Math.round(expo / 10000)), unit:'万', delta:'持续累积', trend:'up' },
+      { label:'整体 NPS', value:String(nps), unit:'', delta:nps >= 0 ? '口碑正向' : '口碑承压', trend:nps >= 0 ? 'up' : 'down', color:nps >= 0 ? 'var(--green)' : 'var(--red)' }
+    ];
+    el('kpiRow').innerHTML = rows.map(function (r) {
+      return '<div class="kpi-card"><div class="kpi-label">' + r.label + '</div>' +
+        '<div class="kpi-value"' + (r.color ? ' style="color:' + r.color + '"' : '') + '>' + r.value + '<span class="unit">' + r.unit + '</span></div>' +
+        '<div class="kpi-delta"><span class="' + r.trend + '">' + (r.trend === 'up' ? '▲' : '▼') + ' ' + r.delta + '</span></div></div>';
+    }).join('');
+  }
+
+  function renderCharts() {
+    var comments = getComments();
+    el('catDist').innerHTML = Chart.donut(catDistItems(comments), '条评论');
+    el('catDistSub').textContent = '共 ' + comments.length + ' 条';
+    el('npsStack').innerHTML = Chart.stack(npsStackItems(comments));
+    var items = getNotes().map(function (n) {
+      return { label: n.cover + ' ' + n.title, value: computeMetrics(n).nps };
+    }).sort(function (a, b) { return b.value - a.value; });
+    el('npsBars').innerHTML = Chart.npsBars(items);
+  }
+
+  function renderBrief() {
+    var notes = getNotes(), comments = getComments();
+    var p = comments.filter(function (c) { return c.nps === 'promoter'; }).length;
+    var d = comments.filter(function (c) { return c.nps === 'detractor'; }).length;
+    var nps = Math.round(((p - d) / (comments.length || 1)) * 100);
+    var highRisk = notes.filter(function (n) { return n.risk === 'high'; });
+    var comp = comments.filter(function (c) { return c.cat === 'competitor'; }).length;
+    var neg = comments.filter(function (c) { return c.cat === 'negative'; }).length;
+    var faq = comments.filter(function (c) { return c.cat === 'faq'; }).length;
+    var intent = comments.filter(function (c) { return c.cat === 'high_intent'; }).length;
+
+    var html = '今日监控 <b>' + notes.length + '</b> 篇投放笔记，评论池 <b>' + comments.length + '</b> 条，整体 NPS 为 <b style="color:' + (nps >= 0 ? 'var(--green)' : 'var(--red)') + '">' + (nps >= 0 ? '+' : '') + nps + '</b>。';
+    if (highRisk.length) html += ' 重点关注：<span class="hl">「' + highRisk.map(function (n) { return n.title.slice(0, 12) + '…'; }).join('」「') + '」负面集中</span>，建议降预算 / 暂停。';
+    html += ' 检测到 <span class="hl">' + comp + '</span> 条竞品截流、<span class="hl">' + neg + '</span> 条负面、<span class="hl">' + faq + '</span> 条 FAQ 高频重复、<span class="hl">' + intent + '</span> 条高意向线索。';
+    html += ' 优先保护高消耗 + 高健康分笔记，守住正向口碑。';
+    el('briefBody').innerHTML = html;
+    el('briefTime').textContent = '生成时间：' + new Date().toLocaleString('zh-CN', { hour12: false });
+  }
+
+  function renderRanking() {
+    var notes = getNotes();
+    var sorted = notes.slice().sort(function (a, b) { return (sortValue(b) || 0) - (sortValue(a) || 0); });
+    var top5 = sorted.slice(0, 5);
+    var worst5 = sorted.slice(-5).reverse();
+    function render(list, isWorst) {
+      return list.map(function (n, i) {
+        var m = computeMetrics(n), dv = displayValue(n, dashSort);
+        var idx = isWorst ? (notes.length - list.length + i + 1) : (i + 1);
+        return '<div class="rank-item" data-go="note" data-id="' + n.id + '">' +
+          '<div class="rank-no ' + (isWorst ? 'worst' : 'top') + '">' + idx + '</div>' +
+          '<div class="rank-thumb" style="background:' + n.color + '">' + n.cover + '</div>' +
+          '<div class="rank-main"><div class="rank-title">' + esc(n.title) + ' <span class="plat">· ' + esc(n.platform || '小红书') + '</span></div>' +
+          '<div class="rank-meta"><span>消耗 <b>' + fmtWan(n.spend) + '</b></span><span>曝光 <b>' + fmtWan(n.exposure) + '</b></span>' +
+          '<span>评论 <b>' + (n.commentCount || 0) + '</b></span><span>健康分 <b>' + n.health + '</b></span></div>' +
+          '<div class="rank-detail">作者 <b>' + esc(n.author) + '</b> · 点赞 <b>' + fmtWan(n.like) + '</b> · NPS <b>' + (m.nps >= 0 ? '+' : '') + m.nps +
+          '</b> · 意向度 <b>' + m.intent + '%</b> · 不歪楼 <b>' + m.onTopic + '%</b> · 风险 <b>' + RISK_LABEL[n.risk] + '</b></div></div>' +
+          '<div class="rank-metric"><div class="v"' + (dv.color ? ' style="color:' + dv.color + '"' : '') + '>' + dv.v + '</div><div class="l">' + dv.l + '</div></div>' +
+          '<button class="rank-expand">▾ 展开</button></div>';
+      }).join('');
+    }
+    el('topList').innerHTML = render(top5, false);
+    el('worstList').innerHTML = render(worst5, true);
+  }
+
+  function renderDashboard() {
+    el('sortSelect').innerHTML = SORT_OPTIONS.map(function (o) {
+      return '<option value="' + o.key + '"' + (o.key === dashSort ? ' selected' : '') + '>' + o.label + '</option>';
+    }).join('');
+    renderStatus(); renderFunnel(); renderRiskQueue(); renderKPI(); renderCharts(); renderBrief(); renderRanking();
+  }
+
+  /* =========================================================
+     笔记详情
+     ========================================================= */
+  var FILTER_TABS = [
+    { key:'all', label:'全部' }, { key:'high_intent', label:'高意向' }, { key:'negative', label:'负面' },
+    { key:'competitor', label:'竞品' }, { key:'off_topic', label:'歪楼' }, { key:'faq', label:'FAQ' }, { key:'praise', label:'好评' }
+  ];
+  var noteFilter = 'all', noteSearch = '';
+
+  function currentNoteId() {
+    var id = current.params.id;
+    if (id && getNote(id)) return id;
+    var notes = getNotes();
+    return notes.length ? notes[0].id : null;
+  }
+
+  function renderNoteView() {
+    var id = currentNoteId();
+    if (!id) { el('noteTitle').textContent = '暂无笔记，请先导入数据'; return; }
+    var n = getNote(id), m = computeMetrics(n);
+
+    el('noteSelect').innerHTML = getNotes().map(function (x) {
+      return '<option value="' + x.id + '"' + (x.id === id ? ' selected' : '') + '>' + esc(x.title) + '</option>';
+    }).join('');
+    el('noteCover').textContent = n.cover || '\u{1F4E6}';
+    el('noteCover').style.background = 'linear-gradient(135deg,' + n.color + ',' + n.color + 'cc)';
+    el('noteTitle').textContent = n.title;
+    el('noteMeta').textContent = (n.platform || '小红书') + ' · ' + (n.industry || '-') + ' · 曝光 ' + fmtWan(n.exposure);
+    el('noteAuthor').innerHTML = '\u{1F464} ' + esc(n.author) +
+      (n.url && /^https?:\/\//i.test(n.url) ? ' · <a href="' + esc(n.url) + '" target="_blank" rel="noopener" style="color:var(--primary)">\u{1F517} 原始链接</a>' : '');
+    el('noteRisk').textContent = '风险：' + RISK_LABEL[n.risk];
+
+    var boxes = [
+      { v:fmtWan(n.spend), l:'消耗(元)' }, { v:fmtWan(n.exposure), l:'曝光' }, { v:String(n.commentCount || 0), l:'评论数' },
+      { v:fmtWan(n.like), l:'点赞' }, { v:(m.nps >= 0 ? '+' : '') + m.nps, l:'NPS', color:m.nps >= 0 ? 'var(--green)' : 'var(--red)' },
+      { v:m.intent + '%', l:'意向度' }, { v:m.onTopic + '%', l:'不歪楼' }, { v:String(n.health), l:'健康分' }
+    ];
+    el('metricGrid').innerHTML = boxes.map(function (b) {
+      return '<div class="metric-box"><div class="v"' + (b.color ? ' style="color:' + b.color + '"' : '') + '>' + b.v + '</div><div class="l">' + b.l + '</div></div>';
+    }).join('');
+
+    renderNoteBrief(n, m);
+    var cs = getComments().filter(function (c) { return c.noteId === n.id; });
+    el('noteCatDist').innerHTML = cs.length ? Chart.donut(catDistItems(cs), '条评论') : '<div class="empty">暂无评论</div>';
+    el('noteNpsStack').innerHTML = cs.length ? Chart.stack(npsStackItems(cs)) : '<div class="empty">暂无评论</div>';
+    renderFilterTabs();
+    renderComments(n);
+  }
+
+  function renderNoteBrief(n, m) {
+    var cs = getComments().filter(function (c) { return c.noteId === n.id; });
+    var cnt = { negative:0, competitor:0, high_intent:0, faq:0, off_topic:0, praise:0 };
+    cs.forEach(function (c) { if (cnt[c.cat] != null) cnt[c.cat]++; });
+    var pending = cs.filter(function (c) { return TODO_CATS.indexOf(c.cat) >= 0 && !isHandled(c.id); });
+    var pos = cs.length ? Math.round((cnt.praise / cs.length) * 100) : 0;
+
+    var s1;
+    if (m.nps >= 30 && cnt.negative === 0) s1 = '评论区整体<b style="color:var(--green)">口碑正向</b>：' + cs.length + ' 条评论中 ' + pos + '% 为好评，无负面信号，本笔记可作为口碑背书持续投放。';
+    else if (cnt.negative + cnt.competitor > 0) s1 = '评论区<b style="color:var(--red)">存在风险</b>：' + cs.length + ' 条评论中负面 ' + cnt.negative + ' 条、竞品截流 ' + cnt.competitor + ' 条，占比 ' + Math.round(((cnt.negative + cnt.competitor) / (cs.length || 1)) * 100) + '%，正在稀释正向口碑。';
+    else s1 = '评论区<b>情绪平稳</b>：' + cs.length + ' 条评论以中性咨询为主，好评 ' + cnt.praise + ' 条、占比 ' + pos + '%，暂无负面与竞品信号。';
+
+    var parts = [];
+    if (cnt.high_intent) parts.push('<span class="hl">高意向 ' + cnt.high_intent + ' 条</span>（有人直接问链接 / 型号，可转化）');
+    if (cnt.faq) parts.push('<span class="hl">FAQ ' + cnt.faq + ' 条</span>（同类问题重复出现，适合置顶统一回答）');
+    if (cnt.off_topic) parts.push('<span class="hl">歪楼 ' + cnt.off_topic + ' 条</span>（讨论偏题，拉低转化效率）');
+    if (cnt.negative) parts.push('<span class="hl">负面 ' + cnt.negative + ' 条</span>（集中在产品吐槽，影响后续转化决策）');
+    if (cnt.competitor) parts.push('<span class="hl">竞品 ' + cnt.competitor + ' 条</span>（评论区被引导去别家，截流效应明显）');
+    var s2 = '关键信号：' + (parts.length ? parts.slice(0, 3).join('；') + (parts.length > 3 ? ' 等' : '') + '。' : '暂无明显信号。');
+
+    var s3;
+    if (!pending.length) s3 = '当前无待派单评论，全部信号已闭环 ✅ 维持监控即可。';
+    else {
+      var first = pending.slice().sort(function (a, b) {
+        return ((b.cat === 'negative' || b.cat === 'competitor') ? 1 : 0) - ((a.cat === 'negative' || a.cat === 'competitor') ? 1 : 0);
+      })[0];
+      var negPend = pending.filter(function (c) { return c.cat === 'negative' || c.cat === 'competitor'; }).length;
+      var t = first.text.length > 20 ? first.text.slice(0, 20) + '…' : first.text;
+      s3 = '建议：剩余 <b style="color:var(--red)">' + pending.length + ' 条待派单</b>' + (negPend ? '（其中 ' + negPend + ' 条负面 / 竞品需优先）' : '') + '，优先处理「' + esc(t) + '」这条。';
+    }
+    el('noteBrief').innerHTML = '<p>' + s1 + '</p><p>' + s2 + '</p><p>' + s3 + '</p>';
+  }
+
+  function renderFilterTabs() {
+    el('filterTabs').innerHTML = FILTER_TABS.map(function (t) {
+      return '<div class="filter-tab' + (noteFilter === t.key ? ' active' : '') + '" data-f="' + t.key + '">' + t.label + '</div>';
+    }).join('');
+  }
+
+  function renderComments(n) {
+    var all = getComments().filter(function (c) { return c.noteId === n.id; });
+    var list = all;
+    if (noteFilter !== 'all') list = list.filter(function (c) { return c.cat === noteFilter; });
+    if (noteSearch.trim()) {
+      var q = noteSearch.trim().toLowerCase();
+      list = list.filter(function (c) {
+        return (c.text || '').toLowerCase().indexOf(q) >= 0 || (c.author || '').toLowerCase().indexOf(q) >= 0;
+      });
+    }
+    el('commentSummary').textContent = '共 ' + all.length + ' 条 · 待派单 ' + all.filter(function (c) { return !isHandled(c.id); }).length + ' 条';
+    if (!list.length) { el('commentsList').innerHTML = '<div class="empty">没有匹配的评论</div>'; return; }
+
+    el('commentsList').innerHTML = list.map(function (c) {
+      var handled = isHandled(c.id);
+      var actionType = getHandledAction(c.id);
+      var actionName = ACTION_LABEL[actionType] || '';
+      var self = ACTOR_LABEL[actionType] === '自己';
+      var actions = buildActions(c.cat);
+      return '<div class="comment-card' + (handled ? ' handled' : '') + '">' +
+        '<div class="comment-head"><div class="c-avatar" style="background:' + hashColor(c.author) + '">' + esc((c.author || '?')[0]) + '</div>' +
+        '<span class="c-author">' + esc(c.author) + '</span>' +
+        '<span class="c-status ' + (handled ? 'st-handled' : 'st-unhandled') + '">' + (handled ? (self ? '已处理' : '已派单') : '待派单') + '</span>' +
+        '<span class="c-time">' + esc(c.time || '') + '</span></div>' +
+        '<div class="c-text">' + esc(c.text) + '</div>' +
+        '<div class="c-tags"><span class="tag nps-' + c.nps + '">' + NPS_ICON[c.nps] + ' ' + NPS_LABEL[c.nps] + '</span>' +
+        '<span class="tag cat-' + c.cat + '">' + CAT_ICON[c.cat] + ' ' + CAT_LABEL[c.cat] + '</span>' +
+        (handled ? '<span class="tag" style="background:var(--green-soft);color:var(--green)">✓ ' + (self ? '已处理' : '已派单给博主') + ' · ' + actionName + '</span>' : '') + '</div>' +
+        (c.reco ? '<div class="ai-reco">\u{1F916} <b>AI 研判：</b>' + esc(c.reco) + '</div>' : '') +
+        '<div class="comment-actions">' + actionButtons(c, handled, self, actions) + '</div></div>';
+    }).join('');
+  }
+
+  function actionButtons(c, handled, self, actions) {
+    if (!handled) {
+      return actions.map(function (a) {
+        return '<button class="action-btn' + (a.reco ? ' reco' : '') + (a.danger ? ' danger' : '') + '" data-act="' + a.type + '" data-cid="' + c.id + '">' + a.icon + ' ' + a.label + '</button>';
+      }).join('');
+    }
+    var h = self ? '<button class="action-btn done" disabled>✓ 已处理（自己）</button>'
+                 : '<button class="action-btn done" disabled>✓ 已派单 · 待跟进</button><button class="action-btn copy" data-copy="' + c.id + '">\u{1F4CB} 复制话术</button>';
+    h += '<button class="action-btn" style="border-color:var(--amber);color:var(--amber);background:var(--amber-soft)" data-undo="' + c.id + '">↩ 撤销</button>';
+    return h;
+  }
+
+  /* =========================================================
+     全部笔记
+     ========================================================= */
+  var NOTES_SORT = [
+    { key:'spend', label:'按消耗' }, { key:'exposure', label:'按曝光' }, { key:'commentCount', label:'按评论数' },
+    { key:'nps', label:'按 NPS' }, { key:'intent', label:'按意向度' }, { key:'onTopic', label:'按不歪楼' }, { key:'health', label:'按健康分' }
+  ];
+  var notesSort = 'spend', notesDesc = true, notesQuery = '';
+
+  function notesSortVal(n) {
+    var m = computeMetrics(n);
+    var map = { spend:n.spend, exposure:n.exposure, commentCount:n.commentCount, nps:m.nps, intent:m.intent, onTopic:m.onTopic, health:n.health };
+    return map[notesSort];
+  }
+
+  function renderNotesView() {
+    el('notesSort').innerHTML = NOTES_SORT.map(function (o) {
+      return '<option value="' + o.key + '"' + (o.key === notesSort ? ' selected' : '') + '>' + o.label + '</option>';
+    }).join('');
+    el('notesSortDir').innerHTML = notesDesc ? '降序 ▼' : '升序 ▲';
+
+    var q = notesQuery.trim().toLowerCase();
+    var list = getNotes().filter(function (n) {
+      return !q || (n.title || '').toLowerCase().indexOf(q) >= 0 || (n.author || '').toLowerCase().indexOf(q) >= 0 || (n.industry || '').toLowerCase().indexOf(q) >= 0;
+    }).sort(function (a, b) {
+      return (notesDesc ? -1 : 1) * ((notesSortVal(a) || 0) - (notesSortVal(b) || 0));
+    });
+
+    el('notesCount').textContent = '共 ' + list.length + ' 篇';
+
+    var riskItems = ['high', 'mid', 'low'].map(function (k) {
+      return { label: RISK_LABEL[k], value: getNotes().filter(function (n) { return n.risk === k; }).length, color: RISK_COLOR[k] };
+    });
+    el('riskDist').innerHTML = Chart.donut(riskItems, '篇笔记');
+    el('spendBars').innerHTML = Chart.valueBars(
+      getNotes().slice().sort(function (a, b) { return b.spend - a.spend; }).slice(0, 6).map(function (n) {
+        return { label: n.cover + ' ' + n.title, value: n.spend, display: fmtWan(n.spend) };
+      }), '#93c5fd', '#2563eb');
+
+    if (!list.length) { el('notesBody').innerHTML = '<tr><td colspan="10" class="empty">没有匹配的笔记</td></tr>'; return; }
+
+    el('notesBody').innerHTML = list.map(function (n) {
+      var m = computeMetrics(n);
+      var hc = n.health >= 80 ? 'var(--green)' : n.health >= 60 ? 'var(--amber)' : 'var(--red)';
+      return '<tr class="note-row" data-go="note" data-id="' + n.id + '">' +
+        '<td><div class="note-cell"><div class="thumb" style="background:' + n.color + '">' + n.cover + '</div><div><div class="t">' + esc(n.title) + '</div><div class="p">' + esc(n.platform || '小红书') + '</div></div></div></td>' +
+        '<td class="muted">' + esc(n.author) + '</td>' +
+        '<td><span class="tag" style="background:#f1f5f9;color:#64748b">' + esc(n.industry || '-') + '</span></td>' +
+        '<td class="num-cell">' + fmtWan(n.spend) + '</td><td class="num-cell">' + fmtWan(n.exposure) + '</td>' +
+        '<td class="num-cell">' + (n.commentCount || 0) + '</td>' +
+        '<td class="num-cell" style="color:' + (m.nps >= 0 ? 'var(--green)' : 'var(--red)') + '">' + (m.nps >= 0 ? '+' : '') + m.nps + '</td>' +
+        '<td class="num-cell" style="color:' + hc + '">' + n.health + '</td>' +
+        '<td><span class="risk-tag ' + n.risk + '">' + RISK_LABEL[n.risk] + '</span></td>' +
+        '<td><button class="btn btn-ghost btn-sm">查看详情 →</button></td></tr>';
+    }).join('');
+  }
+
+  /* =========================================================
+     待办清单
+     ========================================================= */
+  var todoTab = 'unhandled';
+  function todoItems() { return getComments().filter(function (c) { return TODO_CATS.indexOf(c.cat) >= 0; }); }
+
+  function renderTodoView() {
+    if (current.params.tab === 'handled') todoTab = 'handled';
+    var items = todoItems();
+    el('unhandledCnt').textContent = items.filter(function (c) { return !isHandled(c.id); }).length;
+    el('handledCnt').textContent = items.filter(function (c) { return isHandled(c.id); }).length;
+    var tabs = document.querySelectorAll('.todo-tab');
+    for (var i = 0; i < tabs.length; i++) tabs[i].classList.toggle('active', tabs[i].getAttribute('data-t') === todoTab);
+
+    var rank = { negative:0, competitor:0, high_intent:1, off_topic:2, faq:3 };
+    var list = items.filter(function (c) { return todoTab === 'unhandled' ? !isHandled(c.id) : isHandled(c.id); })
+      .sort(function (a, b) { return (rank[a.cat] || 9) - (rank[b.cat] || 9); });
+
+    if (!list.length) {
+      el('todoList').innerHTML = '<div class="empty">' + (todoTab === 'unhandled' ? '太棒了，没有待派单评论 ✅' : '暂无已派单记录') + '</div>';
+      return;
+    }
+
+    el('todoList').innerHTML = list.map(function (c) {
+      var n = getNote(c.noteId);
+      var handled = isHandled(c.id);
+      var actionType = getHandledAction(c.id);
+      var urgent = c.cat === 'negative' || c.cat === 'competitor';
+      var self = ACTOR_LABEL[actionType] === '自己';
+      var title = n ? n.title : '(未知笔记)';
+      return '<div class="todo-item"><div class="todo-priority ' + (urgent ? 'urgent' : 'normal') + '">' + (urgent ? '\u{1F6A8}' : '\u{1F4CC}') + '</div>' +
+        '<div class="todo-main"><div class="todo-comment">' + esc(c.text) + '</div>' +
+        '<div class="c-tags" style="margin:6px 0"><span class="tag nps-' + c.nps + '">' + NPS_ICON[c.nps] + ' ' + NPS_LABEL[c.nps] + '</span>' +
+        '<span class="tag cat-' + c.cat + '">' + CAT_ICON[c.cat] + ' ' + CAT_LABEL[c.cat] + '</span>' +
+        (handled ? '<span class="tag" style="background:var(--green-soft);color:var(--green)">✓ ' + (self ? '已处理' : '已派单给博主') + ' · ' + (ACTION_LABEL[actionType] || '') + '</span>' : '') + '</div>' +
+        (c.reco ? '<div class="ai-reco">\u{1F916} <b>AI 研判：</b>' + esc(c.reco) + '</div>' : '') +
+        '<div class="todo-actions">' + actionButtons(c, handled, self, buildActions(c.cat)) + '</div></div>' +
+        '<div class="todo-side"><span class="todo-src">来源：<a data-go="note" data-id="' + c.noteId + '">' + esc(title.slice(0, 10)) + '…</a></span>' +
+        '<button class="cta-process" data-go="note" data-id="' + c.noteId + '">切入笔记 →</button></div></div>';
+    }).join('');
+  }
+
+  /* =========================================================
+     动作
+     ========================================================= */
+  function doProcess(id, actionType) {
+    var actionName = ACTION_LABEL[actionType] || actionType;
+    var actor = ACTOR_LABEL[actionType] || '对应负责人';
+    var self = actor === '自己';
+    markHandled(id, actionType, ACTION_SCRIPT[actionType] || '');
+    refresh();
+    toast(self ? '已处理：' + actionName + '（自行执行）' : '已派单给 ' + actor + '：' + actionName);
+  }
+  function doUndo(id) { unmarkHandled(id); refresh(); toast('已撤销派单，回到待派单'); }
+
+  /* =========================================================
+     导入 / 导出 / 重置
+     ========================================================= */
+  var modalTab = 'link';
+  function openModal(tab) {
+    modalTab = tab || 'link';
+    var tabs = document.querySelectorAll('#modal .form-tab');
+    for (var i = 0; i < tabs.length; i++) tabs[i].classList.toggle('active', tabs[i].getAttribute('data-t') === modalTab);
+    var panes = document.querySelectorAll('#modal .tabpane');
+    for (var j = 0; j < panes.length; j++) panes[j].style.display = 'none';
+    el('pane-' + modalTab).style.display = '';
+    el('modalHint').textContent = '';
+    el('modal').classList.add('show');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeModal() { el('modal').classList.remove('show'); document.body.style.overflow = ''; }
+  window.openModal = openModal;
+  window.closeModal = closeModal;
+
+  function parseCSV(text) {
+    var rows = [], row = [], cur = '', q = false;
+    for (var i = 0; i < text.length; i++) {
+      var ch = text[i];
+      if (q) {
+        if (ch === '"') { if (text[i + 1] === '"') { cur += '"'; i++; } else q = false; }
+        else cur += ch;
+      } else {
+        if (ch === '"') q = true;
+        else if (ch === ',') { row.push(cur); cur = ''; }
+        else if (ch === '\n') { row.push(cur); rows.push(row); row = []; cur = ''; }
+        else if (ch === '\r') { /* skip */ }
+        else cur += ch;
+      }
+    }
+    if (cur !== '' || row.length) { row.push(cur); rows.push(row); }
+    return rows.filter(function (r) { return r.some(function (x) { return String(x).trim() !== ''; }); });
+  }
+
+  function normalizeNotes(rawNotes) {
+    return (rawNotes || []).map(function (o, i) {
+      var note = {
+        id: o.id || ('N' + (i + 1)),
+        platform: o.platform || '小红书',
+        title: o.title || ('未命名笔记 ' + (i + 1)),
+        author: o.author || '未知博主',
+        cover: o.cover || '\u{1F4E6}',
+        color: o.color || NOTE_COLORS[i % NOTE_COLORS.length],
+        spend: Number(o.spend) || 0,
+        exposure: Number(o.exposure) || 0,
+        commentCount: Number(o.commentCount) || 0,
+        like: Number(o.like) || 0,
+        health: Number(o.health) || 70,
+        risk: ['high', 'mid', 'low'].indexOf(o.risk) >= 0 ? o.risk : 'low',
+        industry: o.industry || '未分类'
+      };
+      if (o.url) note.url = o.url;
+      return note;
+    });
+  }
+  function normalizeComments(rawComments, notes) {
+    return (rawComments || []).map(function (o, i) {
+      var noteId = o.noteId != null ? String(o.noteId) : '';
+      var found = notes.filter(function (n) { return n.id === noteId; })[0];
+      if (!found) {
+        var idx = parseInt(noteId, 10) - 1;
+        if (!isNaN(idx) && notes[idx]) noteId = notes[idx].id;
+        else if (notes[0]) noteId = notes[0].id;
+      }
+      var cat = CAT_LABEL[o.cat] ? o.cat : 'off_topic';
+      return {
+        id: o.id || ('C' + Date.now() + '_' + i),
+        noteId: noteId,
+        author: o.author || '匿名用户',
+        time: o.time || '刚刚',
+        text: o.text || '',
+        nps: NPS_LABEL[o.nps] ? o.nps : inferNps(cat),
+        cat: cat,
+        reco: o.reco || ''
+      };
+    });
+  }
+
+  function applyJSON(obj) {
+    var notes = normalizeNotes(obj.notes || []);
+    if (!notes.length) { toast('JSON 中未找到 notes 数组'); return; }
+    var comments = normalizeComments(obj.comments || [], notes);
+    state.dataset = { notes: notes, comments: comments };
+    state.extraNotes = [];
+    state.handled = {}; state.scripts = {};
+    saveState();
+    closeModal(); refresh();
+    toast('已导入 ' + notes.length + ' 篇笔记 / ' + comments.length + ' 条评论');
+  }
+
+  function applyCSV(text) {
+    var rows = parseCSV(text);
+    if (rows.length < 2) { toast('CSV 至少需要表头 + 1 行数据'); return; }
+    var head = rows[0].map(function (h) { return String(h).trim().toLowerCase(); });
+    var idx = {};
+    head.forEach(function (h, i) { idx[h] = i; });
+    if (idx.text == null) { toast('CSV 缺少必填列：text'); return; }
+    function pick(r, key) { return idx[key] != null ? r[idx[key]] : ''; }
+    var raw = rows.slice(1).map(function (r) {
+      return {
+        noteId: pick(r, 'noteid'), author: pick(r, 'author'), time: pick(r, 'time'),
+        text: pick(r, 'text'), nps: pick(r, 'nps'), cat: pick(r, 'cat'), reco: pick(r, 'reco')
+      };
+    });
+    var notes = getNotes();
+    var comments = getComments().slice().concat(normalizeComments(raw, notes));
+    state.dataset = { notes: notes, comments: comments };
+    saveState();
+    closeModal(); refresh();
+    toast('已追加 ' + raw.length + ' 条评论');
+  }
+
+  function applyLinks(text) {
+    var lines = text.split(/\r?\n/).map(function (l) { return l.trim(); }).filter(Boolean);
+    if (!lines.length) { toast('请先粘贴小红书链接'); return; }
+    var baseLen = getNotes().length;
+    var list = lines.map(function (line, i) {
+      var isUrl = /^https?:\/\//i.test(line);
+      var tail = isUrl ? line.replace(/[?#].*$/, '').split('/').filter(Boolean).pop() : line;
+      var spend = 30000 + Math.floor(Math.random() * 220000);
+      return {
+        id: 'NX' + Date.now() + '_' + i,
+        platform: '小红书',
+        title: '小红书笔记 · ' + String(tail || '待抓取').slice(0, 14),
+        author: '待抓取',
+        cover: '\u{1F4E6}',
+        color: NOTE_COLORS[(baseLen + i) % NOTE_COLORS.length],
+        spend: spend,
+        exposure: Math.round(spend * (3 + Math.random() * 6)),
+        commentCount: 0, like: 0, health: 70, risk: 'low', industry: '待抓取',
+        url: line
+      };
+    });
+    state.extraNotes = (state.extraNotes || []).concat(list);
+    saveState();
+    closeModal(); refresh();
+    toast('已记录 ' + list.length + ' 个链接，生成占位笔记');
+  }
+
+  function readFile(input, cb) {
+    var f = input.files && input.files[0];
+    if (!f) return;
+    var reader = new FileReader();
+    reader.onload = function () { cb(String(reader.result)); };
+    reader.readAsText(f, 'utf-8');
+  }
+
+  function submitModal() {
+    if (modalTab === 'link') {
+      var v1 = el('linkInput').value.trim();
+      if (!v1) { el('modalHint').textContent = '请先粘贴链接，或选择 .txt / .csv 文件'; return; }
+      applyLinks(v1);
+    } else if (modalTab === 'json') {
+      var v2 = el('jsonInput').value.trim();
+      if (!v2) { el('modalHint').textContent = '请先粘贴 JSON 内容或选择文件'; return; }
+      try { applyJSON(JSON.parse(v2)); }
+      catch (e) { el('modalHint').textContent = 'JSON 解析失败：' + e.message; }
+    } else {
+      var v3 = el('csvInput').value.trim();
+      if (!v3) { el('modalHint').textContent = '请先粘贴 CSV 内容或选择文件'; return; }
+      applyCSV(v3);
+    }
+  }
+
+  var SAMPLES = {
+    link: 'https://www.xiaohongshu.com/explore/66a1b2c3\nhttps://xhslink.com/a/xxxx',
+    json: JSON.stringify({
+      notes: [
+        { title: '示例笔记 A', author: '博主A', spend: 120000, exposure: 500000, commentCount: 3, like: 9000, health: 80, risk: 'low', industry: '美妆' }
+      ],
+      comments: [
+        { noteId: 'N1', author: '用户1', time: '1 分钟前', text: '这个色号显白吗？', nps: 'passive', cat: 'high_intent', reco: '高意向，建议私信引导' },
+        { noteId: 'N1', author: '用户2', time: '3 分钟前', text: '上脸卡粉严重，别买', nps: 'detractor', cat: 'negative', reco: '负面，建议私信安抚' },
+        { noteId: 'N1', author: '用户3', time: '5 分钟前', text: '已回购三次，真心推荐', nps: 'promoter', cat: 'praise', reco: '推荐者，建议置顶' }
+      ]
+    }, null, 2),
+    csv: 'noteId,author,time,text,nps,cat,reco\nN1,用户4,2 分钟前,和 B 牌比哪个更划算,detractor,competitor,竞品截流，建议举报\nN1,用户5,6 分钟前,敏感肌能用吗,passive,faq,FAQ，建议置顶说明'
+  };
+
+  window.exportJSON = function () {
+    var data = { notes: getNotes(), comments: getComments() };
+    var blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = '评安中心-数据-' + new Date().toISOString().slice(0, 10) + '.json';
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    setTimeout(function () { URL.revokeObjectURL(a.href); }, 1000);
+    toast('已导出当前数据 JSON');
+  };
+  window.resetAll = function () {
+    if (!window.confirm('确定清空本地派单记录与导入的数据，恢复为内置演示数据？')) return;
+    try { localStorage.removeItem(KEY); } catch (e) {}
+    state = { handled: {}, scripts: {}, extraNotes: [], dataset: null };
+    saveState();
+    refresh();
+    toast('已重置为内置演示数据');
+  };
+
+  /* =========================================================
+     事件绑定
+     ========================================================= */
+  document.addEventListener('click', function (e) {
+    var goEl = e.target.closest('[data-go]');
+    if (goEl) {
+      var v = goEl.getAttribute('data-go');
+      if (v === 'note') go('note', { id: goEl.getAttribute('data-id') });
+      else if (v === 'todo') go('todo', goEl.getAttribute('data-tab') ? { tab: goEl.getAttribute('data-tab') } : {});
+      else go(v);
+      return;
+    }
+    var navEl = e.target.closest('[data-nav]');
+    if (navEl) { go(navEl.getAttribute('data-nav')); return; }
+
+    var act = e.target.closest('[data-act]');
+    if (act) { doProcess(act.getAttribute('data-cid'), act.getAttribute('data-act')); return; }
+    var undo = e.target.closest('[data-undo]');
+    if (undo) { doUndo(undo.getAttribute('data-undo')); return; }
+    var cp = e.target.closest('[data-copy]');
+    if (cp) { copyText(getScript(cp.getAttribute('data-copy')) || '暂无话术'); toast('建议话术已复制'); return; }
+
+    var exp = e.target.closest('.rank-expand');
+    if (exp) {
+      e.stopPropagation();
+      var det = exp.parentNode.querySelector('.rank-detail');
+      var open = det.style.display === 'block';
+      det.style.display = open ? 'none' : 'block';
+      exp.textContent = open ? '▾ 展开' : '▴ 收起';
+      return;
+    }
+    var ft = e.target.closest('#filterTabs .filter-tab');
+    if (ft) { noteFilter = ft.getAttribute('data-f'); renderFilterTabs(); renderComments(getNote(currentNoteId())); return; }
+    var tt = e.target.closest('.todo-tab');
+    if (tt) { todoTab = tt.getAttribute('data-t'); renderTodoView(); return; }
+    var mt = e.target.closest('#modal .form-tab');
+    if (mt) { openModal(mt.getAttribute('data-t')); return; }
+  });
+
+  el('sortSelect').addEventListener('change', function () { dashSort = this.value; renderRanking(); });
+  el('noteSelect').addEventListener('change', function () { go('note', { id: this.value }); });
+  el('searchInput').addEventListener('input', function () { noteSearch = this.value; renderComments(getNote(currentNoteId())); });
+  el('notesSearch').addEventListener('input', function () { notesQuery = this.value; renderNotesView(); });
+  el('notesSort').addEventListener('change', function () { notesSort = this.value; renderNotesView(); });
+  el('notesSortDir').addEventListener('click', function () { notesDesc = !notesDesc; renderNotesView(); });
+
+  el('modalOk').addEventListener('click', submitModal);
+  el('modalSample').addEventListener('click', function () {
+    var box = { link: 'linkInput', json: 'jsonInput', csv: 'csvInput' }[modalTab];
+    el(box).value = SAMPLES[modalTab];
+    el('modalHint').textContent = '已填入示例内容，可直接点「确认导入」试用';
+  });
+  el('linkFile').addEventListener('change', function () { readFile(this, function (t) { el('linkInput').value = t; }); });
+  el('jsonFile').addEventListener('change', function () { readFile(this, function (t) { el('jsonInput').value = t; }); });
+  el('csvFile').addEventListener('change', function () { readFile(this, function (t) { el('csvInput').value = t; }); });
+  el('modal').addEventListener('click', function (e) { if (e.target === this) closeModal(); });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeModal(); });
+
+  window.addEventListener('hashchange', onRoute);
+
+  if (!location.hash) location.hash = '#/dashboard';
+  onRoute();
+})();
+</script>
+</body>
+</html>
+
